@@ -48,7 +48,7 @@ See [Authoring effects](docs/authoring-effects.md).
 
 | | |
 |---|---|
-| [Command line traps](docs/command-line-traps.md) | **Start here.** 11 ways Eos accepts input that does not mean what it looks like |
+| [Command line traps](docs/command-line-traps.md) | **Start here.** 19 ways Eos accepts input that does not mean what it looks like |
 | [OSC protocol](docs/osc-protocol.md) | Reading show data: handshake, list convention, what is and is not readable |
 | [File format](docs/file-format.md) | `.esf3d` / `.esf2` anatomy, and why not to build on it |
 | [What can be automated](docs/what-can-be-automated.md) | Capability matrix |
@@ -57,6 +57,7 @@ See [Authoring effects](docs/authoring-effects.md).
 | [Authoring macros](docs/authoring-macros.md) | Learn mode doesn't work; the OSC + synthesised-keystroke recipe that does |
 | [Effects model](docs/effects-model.md) | How the effects engine actually works — types, attributes, and the two-level Rate/Scale trap |
 | [Building a show](docs/building-a-show.md) | Recipes and traps for generating cues, groups, palettes, presets and subs at scale |
+| [The Norco location](docs/norco-location.md) | The venue: room dimensions, the Augment3d scene, and where all 70 fixtures live |
 
 ## Tools
 
@@ -105,6 +106,13 @@ matches. All verify by reading state back, and all save via the key that works.
 | `move_effects.py` | renumber a block of effects, verifying each before deleting |
 | `ms_gen.py` / `build_magic_sheets.py` | generate magic sheets as importable XML |
 
+### Venue and rig
+
+| Script | Builds |
+|---|---|
+| `a3d_room.py` | the whole Augment3d room from two numbers — stage width and depth in feet. Edits `working.a3d` in an extracted show; see [The Norco location](docs/norco-location.md) |
+| `build_rig_positions.py` | positions and aims all 70 fixtures over OSC, then verifies every one by read-back |
+
 ## Tests
 
 No console required — they stand up a fake Eos that speaks the documented
@@ -128,3 +136,4 @@ any other way.
 ## Licence
 
 MIT
+

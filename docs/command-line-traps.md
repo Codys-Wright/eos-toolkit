@@ -242,3 +242,94 @@ from the Augment3d display (`BLIND: A3D Edit`) — there, `Control+Enter` does
 nothing at all and digits fall back to channel selection. The two are easy to
 confuse: A3D Edit is the rendered 3D view, the Augment3d **tab in Patch** is a
 channel list with XYZ columns.
+
+## 16. Three ways a write silently does nothing
+
+Over one session of placing 70 fixtures, three *distinct* silent failures
+turned up. Only read-back caught all three.
+
+**Wrong display.** `Position` is valid in Patch and nowhere else. Ninety
+commands sent from `BLIND: Magic Sheet 2` all errored; the script wasn't
+reading echoes, so it reported success. Check `/eos/out/cmd` for `Error` after
+every command:
+
+```python
+conn.send("/eos/newcmd", cmd + "#"); time.sleep(0.13)
+echo = next((a[0] for addr,a in conn.recv() if addr=="/eos/out/cmd" and a), "")
+if "Error" in echo: ...
+```
+
+**Dropped keystrokes.** Synthesised `/` never arrives. Typing `//9.08` against
+`Chan 44` produced `Chan 449 Cell 08` — slashes vanished, digits appended to the
+channel. Neither the main-row slash nor the numeric keypad (`key code 75`)
+works. Coordinates go over OSC, never as keystrokes.
+
+**Accepted but not applied.** Two of 140 commands echoed cleanly and did not
+take effect. Echo-checking is necessary but *not sufficient*. Re-read the value:
+
+```
+/eos/get/patch/index/<i>  ->  /eos/out/get/patch/<ch>/<part>/augment3d/position
+```
+
+Note `index` is the **position in the patch list**, not the channel number —
+channel 80 is index 52, not 79. Build the map from a patch dump once; indices
+are stable when positions change.
+
+## 17. Softkey indices are neither 1-based nor contiguous
+
+Patch reports `{4: Query, 5: Fixtures, 6: Properties}`; the Fixture Editor
+reports `{3: Lamp Controls, 4: Physical Data, 5: Patch, 6: Fixture Info}`. The
+status helper compacts empties, so its list order is not the index.
+
+Read `/eos/out/softkey/N` raw and match on the label before pressing. Guessing
+an index in Patch could hit `Unpatch`.
+
+## 18. Submaster and fader properties: what is reachable
+
+Probed against 3.3.9.25. Verified by reading `/eos/get/sub/<n>` back.
+
+**Works, and confirmed by read-back:**
+
+```
+Sub N Time <up> Time <Hold|Manual|secs> Time <down>     up / dwell / down
+Sub N Additive  |  Sub N Inhibitive                     mode
+```
+
+`Time Manual` is the "flash while the bump is held" setting.
+`Sub N Time` alone resets up/down but **leaves dwell unchanged** — set it
+explicitly.
+
+**Parses, but not verifiable over OSC** (fader config is not exposed —
+`/eos/get/fader/...` returns nothing):
+
+```
+Fader N Filter Intensity      Sub N Priority <n>      Sub N Independent
+```
+
+**No text path at all** — these are Tab 36, mouse only:
+
+- Intensity Master (`Master Intensity` parses but the echo drops `Intensity`)
+- Effect mode, Solo, Exclude Solo, Freeze, effect rate ranges, HTP/LTP
+
+The echo is the diagnostic. `Fader 1 Filter Intensity` echoes back *with*
+`Intensity`; `Fader 1 Master Intensity` echoes as `Master` alone — same
+"accepted" status, but one kept its argument and the other ate it.
+
+Also: `Sub N Filter Intensity` parses and changes **nothing** in the read-back.
+That is the *record* filter, not the Tab 36 fader filter. Accepted is not
+applied.
+
+## 19. Augment3d fixture models
+
+`Fixture Model` decides what a fixture looks like in Augment3d. There is **no
+command-line syntax** — `Chan N Model`, `Symbol`, `Augment3d Model` all error.
+
+Reach it at **Patch → {Fixtures} → {Physical Data}**. It is set **per fixture
+type**, not per channel, so one change covers every channel patched to that
+type.
+
+`Chan N Beam Angle <n>` *does* work from the command line.
+
+Same page: **Hang to Focus Offset X/Y/Z**, the offset from the base to the
+pan/tilt pivot, used when converting an XYZ beam target to pan/tilt. Left at
+zero, aimed positions on movers are slightly off.

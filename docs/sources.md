@@ -11,6 +11,7 @@ answered what, and where to get it.
 | **Eos Family v3.1.0 Operations Manual** (`EosFamily_v3.1.0_UserManual_RevA.pdf`) | [ETC manuals page](https://www.etcconnect.com/Products/Consoles/Eos-Consoles/All-Eos-Downloads/Manuals.aspx) |
 | **Eos Family Keyboard Shortcuts** (`EosFamily_KeyboardShortcuts.pdf`) | ships with the app — `~/Documents/ETC/Eos/` on macOS |
 | **Eos Family Show Control User Guide, Rev C** | [PDF mirror](https://media.musson.com/mti/docs/e/o/eosfamily_showcontrol_userguide_revc.pdf) |
+| **Rockstars of Tomorrow, Norco — As Built 2017** (`ROT_Norco_As_Built_2017.pdf`) | operator's own floor plan; **plan view only, no section, so no ceiling height** |
 | **Eos Family Online Help** (v3.3.x, HTML — most current) | [etcconnect.com WebDocs](https://www.etcconnect.com/WebDocs/Controls/EosFamilyOnlineHelp/en/Content/01_Welcome/WELCOME_TO_EOS.htm) |
 
 The Show Control guide is **Rev C (2017, Eos 2.x era)**. Its OSC appendix is
@@ -32,6 +33,12 @@ still the best protocol reference, but it predates Eos 3.x — which is why
 | **Set Channel Locations From Magic Sheet** | Operations Manual p.471–472, *Augment3d with Magic Sheets & Pixel Maps* |
 | Z is the height axis (floor points share a Z) | Operations Manual p.461, *FPE Points* |
 | Patch = `;` | Keyboard Shortcuts PDF |
+| Fixture Model, Hang to Focus Offset | Operations Manual p.164–165, *Physical Data Editor* |
+| Fixture Editor: Patch → {Fixtures} | Operations Manual p.153 |
+| Submaster properties, times, modes | Operations Manual p.369–376 |
+| Fader Configuration (Tab 36) | Operations Manual p.101–104 |
+| Augment3d Inspector: Position/Scale/Rotation only | Operations Manual p.451, 456 |
+| Venue dimensions | `ROT_Norco_As_Built_2017.pdf` + operator measurement |
 | Step effect attributes (Bounce/Build/Negative/Random) | Online Help + ETC community |
 | Augment3d fixture placement syntax | Operations Manual p.458–459 |
 | Renumbering hazards (FX un-stopping, timecode) | [ETC community thread 28557](https://community.etcconnect.com/control_consoles/eos-family-consoles/f/eos-family/28557/renumbering-cues-and-properties-links-fx-intensity-times-change) |

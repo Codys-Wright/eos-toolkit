@@ -1,4 +1,10 @@
-# The rig, and the Augment3d model (in progress)
+# The rig, and the Augment3d model
+
+> **Superseded for the venue and the placed rig.** The room, the coordinate
+> convention, the scene-file mechanics and the final fixture layout now live in
+> [norco-location.md](norco-location.md). This file is kept for the fixture
+> inventory, the magic-sheet import history and the OSC write path.
+
 
 ## The rig, measured
 

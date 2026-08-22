@@ -54,38 +54,53 @@ operating model.
 
 ## Open threads
 
-**Augment3d model** — **DONE**, 2026-08-22. 67 of 69 fixtures placed and
-verified.
+**Augment3d model** — **DONE**. The room is modelled to the real venue and all
+70 fixtures are placed, aimed and verified. See
+[norco-location.md](norco-location.md) for every dimension, the coordinate
+convention, the scene-file mechanics and the rig layout.
 
-Positions came from Eos's own **Set Channel Locations From Magic Sheet**
-(Patch → right-click the Augment3d tab), run against magic sheet 2 (LIGHTING
-POSITIONS) — not from `a3d_positions.json`, which is now superseded for X/Y and
-kept only as the record of intended heights.
+Two scripts reproduce it:
 
-The import writes the sheet's second axis into **both Y and Z**, so every
-fixture landed at `z == y`. Corrected with six range commands using the verb
-`Position` (not `Select`, which is a hardware key):
-
-```
-Chan 1 Thru 18 + 20 Thru 48 Position / / 9.08
+```bash
+python3 a3d_room.py <extracted-show-dir> 30 22   # room, from stage W x D in feet
+python3 build_rig_positions.py --send            # all 70 fixtures, positions + aim
 ```
 
-Empty coordinates mean "no change", so X/Y were preserved — verified: no X/Y
-moved, no address changed. See [rig-model.md](rig-model.md) and traps 13–15.
+Still approximate, in priority order:
 
-Coordinates are **sheet units, ~1.65 per metre**, not metres. Deliberate — a
-uniformly scaled model renders identically, and it is one global multiply to
-convert if the stage is ever measured.
+- **Ceiling height is an operator estimate (12 ft), not a measurement.**
+  Everything vertical scales off it — the 3.25 m par trim, every tilt angle,
+  the booth partition height.
+- **Tilt is capped at 65°**, so both audience rows aim parallel instead of the
+  far row raking flatter. Geometry wants ~70° and ~74°.
+- **Channels 1 and 2** point straight upstage; a lone side par usually toes in.
+- **Pairs are not fanned** — only groups of four are.
 
-Still open on this thread:
-- **Channel 98** — patched floor mover, absent from the magic sheet, no X/Y
-  from any source. Needs operator input.
-- **Channel 19** — unpatched, left at origin on purpose.
-- **Orientation** — every fixture is still `0/0/0` (straight down). Correct for
-  the overhead units, wrong for floor movers 85–88 and 98, which point
-  somewhere else. Never measured.
-- **Never seen by eye.** The whole model is verified *structurally* over OSC.
-  Nobody has confirmed the rendered 3D view looks like the actual room.
+**Busking layout** — direct selects built and verified, four banks of ten:
+
+```
+groups   Rig All, Pars All, Movers All, Strips, SlimPars,
+         Front/Mid/Back Wash, Left All, Right All
+colour   Red Orange Yellow Green Cyan Blue Purple Magenta WarmWhite ColdWhite
+focus    OH Up/Centre Ceiling/Centre Up/Side Walls, Beam Ceiling/Ctr/Drum/
+         Side Walls/Cross Corners/Floor Ctr
+beam     Open, Spots Big, Spots Small, Stars, Star, Flower, Flower Fat,
+         Spiral, X, Zebra
+```
+
+Palettes were duplicated by **recall-then-record**, not `Copy To` (which is a
+key, not command-line text). Beam originals were stashed at 101–108 first
+because sources and targets overlapped.
+
+Known gaps in that bank: `Open` (BP 1) only covers channels 80–83 — no
+open-gobo palette exists anywhere for the floor beams 85–88. Focus palettes
+5–10 cover 85–88 but not 98. Beam palettes 2, 3, 4, 7, 9, 10 carry junk
+channels (pars and strips inside a gobo palette) inherited from a rig-wide
+original.
+
+**Faders** — only partly scriptable; see [trap 18](command-line-traps.md).
+Timing and mode work from the command line; intensity master, effect mode,
+solo, exclude-solo, freeze and rate ranges are Tab 36 and mouse-only.
 
 **Colour FX macro bank** — agreed but not built. Macros 141–165 pointing at the
 absolute colour effects (800–860) and rainbows (910–919), same stop-then-start
