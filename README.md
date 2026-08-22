@@ -54,6 +54,7 @@ See [Authoring effects](docs/authoring-effects.md).
 | [What can be automated](docs/what-can-be-automated.md) | Capability matrix |
 | [Authoring effects](docs/authoring-effects.md) | Creating and editing effects over OSC — and the one precondition nobody documents |
 | [Magic sheets](docs/magic-sheets.md) | Why OSC can't touch them, and the XML import/export path that can |
+| [Authoring macros](docs/authoring-macros.md) | Learn mode doesn't work; the OSC + synthesised-keystroke recipe that does |
 
 ## Tools
 
@@ -97,6 +98,10 @@ matches. All verify by reading state back, and all save via the key that works.
 | `build_chases.py` | **designed FX as looping cue lists** — the workaround for GUI-only effect authoring |
 | `build_popstars.py` | a full show: acts as cue blocks, sequenced by links |
 | `rename_effects.py` | normalise every effect label |
+| `build_macros.py` | one-press FX macros — group + effect in a single button |
+| `build_fx_presets.py` | FX submasters pairing each effect with its group |
+| `move_effects.py` | renumber a block of effects, verifying each before deleting |
+| `ms_gen.py` / `build_magic_sheets.py` | generate magic sheets as importable XML |
 
 ## Tests
 
