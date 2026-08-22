@@ -29,20 +29,44 @@ attribute we do not understand is carried over untouched.
 Object KEYs seen in the wild: ChannelButton, Button, Square, Fader, Symbol,
 Truss, Pipe, Triangle, Pentagon.
 
-TARGETTYPE codes confirmed so far:
-     0  None (decorative)
-    20  Channel
-     4  Macro (inferred: id 5 matched the show's Macro 5)
-     2  unknown - seen on Buttons
-    45  unknown - seen on Faders
-Run `python3 ms_gen.py --probe-sheet out.xml` to generate a sheet that maps the
-remaining codes: import it, then re-export and read which targets resolved.
+TARGETTYPE codes, confirmed by importing a probe sheet and reading the type
+labels Eos renders on each button:
+
+     0  None        13  Effect
+     2  Cue         14  Address
+     3  Group       20  Channel
+     4  Macro       23  User
+     9  Preset      24  Show Control
+    10  Sub         29  Snapshot
+
+Palettes are not in 0-29. TARGETTYPE 45 appears on Fader objects, so they are
+probably in the 30-59 range - use --probe-sheet with --lo/--hi to find them.
+
+NOTE: Eos imports ANY targettype without complaint and re-exports it unchanged,
+so a wrong code produces a sheet that imports "successfully" and does nothing.
+Generated sheets need visual confirmation the first time.
 """
 import argparse
 import copy
 import xml.etree.ElementTree as ET
 
-TARGETTYPE = {"none": 0, "channel": 20, "macro": 4}
+# Confirmed by importing a probe sheet and reading the rendered type labels.
+TARGETTYPE = {
+    "none":      0,
+    "cue":       2,
+    "group":     3,
+    "macro":     4,
+    "preset":    9,
+    "sub":      10,
+    "effect":   13,
+    "address":  14,
+    "channel":  20,
+    "user":     23,
+    "showcontrol": 24,
+    "snapshot": 29,
+    # palettes are NOT in 0-29; TARGETTYPE 45 was observed on Fader objects,
+    # so intensity/focus/colour/beam palettes are likely in the 30-59 range.
+}
 
 
 def load(path):
@@ -131,6 +155,8 @@ def main():
                     help="an exported magic sheet .xml to clone items from")
     ap.add_argument("--probe-sheet", metavar="OUT",
                     help="generate a sheet that maps unknown TARGETTYPE codes")
+    ap.add_argument("--lo", type=int, default=0, help="probe range start")
+    ap.add_argument("--hi", type=int, default=29, help="probe range end")
     a = ap.parse_args()
 
     tpl = load(a.template)
@@ -141,13 +167,11 @@ def main():
         # target reveal the mapping.
         btn = find_template(tpl, "ChannelButton")
         out = new_sheet(tpl)
-        codes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-                 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
-        entries = [(1, f"T{c}") for c in codes]
+        codes = list(range(a.lo, a.hi + 1))
         for n, c in enumerate(codes):
             it = copy.deepcopy(btn)
-            set_item(it, x=(n % 6) * 120, y=(n // 6) * 80, w=110, h=65,
-                     targettype=c, targetid=1, text=f"TYPE {c}")
+            set_item(it, x=(n % 6) * 150, y=(n // 6) * 95, w=140, h=80,
+                     targettype=c, targetid=1, text=f"T{c}")
             add(out, it)
         save(out, a.probe_sheet)
         print(f"wrote {a.probe_sheet} - {len(codes)} probe buttons")
