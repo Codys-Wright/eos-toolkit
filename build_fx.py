@@ -23,7 +23,7 @@ import eosdump as E
 
 # RIG CAPABILITY MATRIX (measured, not assumed):
 #   RGB colour fx (910/912/913/917)  -> pars, strips, slimpars ONLY
-#   Absolute colour fx (100-159,4xx) -> everything, incl. movers (colour WHEELS)
+#   Absolute colour fx (800-859,4xx) -> everything, incl. movers (colour WHEELS)
 #   Focus fx (901-933)               -> movers ONLY (no pan/tilt on the wash)
 #   Intensity fx (936-941)           -> everything
 #   CMY (918) and Hue-Sat (914)      -> NOTHING on this rig has those params
@@ -89,18 +89,18 @@ BANK = [
     (54,  3, 911,  90, 100, 100, "Col Fade Lin"),
     (55,  3, 913,  90, 100, 100, "Bump Colour"),
     (56,  3, 525,  90, 100, 100, "Red Pink Yel"),
-    (57,  3, 100,  90, 100, 100, "Red Blue"),
-    (58,  3, 101,  90, 100, 100, "Red Green"),
-    (59,  3, 104,  90, 100, 100, "Red Magenta"),
-    (60,  3, 107,  90, 100, 100, "Red Yellow"),
-    (61,  3, 109,  90, 100, 100, "Red White"),
-    (62,  3, 110,  90, 100, 100, "Green Blue"),
-    (63,  3, 113,  90, 100, 100, "Green Cyan"),
-    (64,  3, 114,  90, 100, 100, "Green Magenta"),
-    (65,  3, 124,  90, 100, 100, "Blue Magenta"),
-    (66,  3, 128,  90, 100, 100, "Blue Orange"),
-    (67,  3, 144,  90, 100, 100, "Cyan Magenta"),
-    (68,  3, 156,  90, 100, 100, "Mag Yellow"),
+    (57,  3, 800,  90, 100, 100, "Red Blue"),
+    (58,  3, 801,  90, 100, 100, "Red Green"),
+    (59,  3, 804,  90, 100, 100, "Red Magenta"),
+    (60,  3, 807,  90, 100, 100, "Red Yellow"),
+    (61,  3, 809,  90, 100, 100, "Red White"),
+    (62,  3, 810,  90, 100, 100, "Green Blue"),
+    (63,  3, 813,  90, 100, 100, "Green Cyan"),
+    (64,  3, 814,  90, 100, 100, "Green Magenta"),
+    (65,  3, 824,  90, 100, 100, "Blue Magenta"),
+    (66,  3, 828,  90, 100, 100, "Blue Orange"),
+    (67,  3, 844,  90, 100, 100, "Cyan Magenta"),
+    (68,  3, 856,  90, 100, 100, "Mag Yellow"),
     (69,  3, 413,  90, 100, 100, "RYB Step"),
     (70,  3, 405,  90, 100, 100, "RB White Step"),
     (71,  3, 400,  90, 100, 100, "Grn Orng Step"),

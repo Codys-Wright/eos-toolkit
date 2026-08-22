@@ -49,19 +49,20 @@ SCATTER = [17,3,42,28,9,35,1,46,22,12,39,5,31,48,14,26,7,44,19,33,
            2,40,25,11,37,6,29,16,45,21,8,34,13,47,24,4,38,30,10,43,
            18,27,36,15,41,23,32,20]
 
+# (effect, group, label, steps, channel order, cycle seconds)
 CHASES = [
-    (201, "Chase Odd 6",    6, list(range(1, 49, 2)),           0.6),
-    (202, "Chase Even 6",   6, list(range(2, 49, 2)),           0.6),
-    (203, "Chase L to R",   8, L_TO_R,                          0.8),
-    (204, "Chase R to L",   8, L_TO_R[::-1],                    0.8),
-    (205, "Chase Ctr Out",  6, CTR_OUT,                         0.7),
-    (206, "Chase Out In",   6, CTR_OUT[::-1],                   0.7),
-    (207, "Chase Front Bk", 4, FRONT_BACK,                      0.6),
-    (208, "Chase Back Frnt",4, FRONT_BACK[::-1],                0.6),
-    (209, "Chase Scatter",  8, SCATTER,                         0.5),
-    (210, "Chase Quarters", 4, list(range(1, 49)),              0.8),
-    (211, "Chase Strips",   8, list(range(90, 98)),             0.4),
-    (212, "Chase Movers",   8, [80,81,82,83,85,86,87,88],       0.9),
+    ( 26, 201, "Chase Odd 6",    6, list(range(1, 49, 2)),           0.6),
+    ( 27, 202, "Chase Even 6",   6, list(range(2, 49, 2)),           0.6),
+    ( 28, 203, "Chase L to R",   8, L_TO_R,                          0.8),
+    ( 29, 204, "Chase R to L",   8, L_TO_R[::-1],                    0.8),
+    ( 30, 205, "Chase Ctr Out",  6, CTR_OUT,                         0.7),
+    ( 31, 206, "Chase Out In",   6, CTR_OUT[::-1],                   0.7),
+    ( 32, 207, "Chase Front Bk", 4, FRONT_BACK,                      0.6),
+    ( 33, 208, "Chase Back Frnt",4, FRONT_BACK[::-1],                0.6),
+    ( 34, 209, "Chase Scatter",  8, SCATTER,                         0.5),
+    ( 35, 210, "Chase Quarters", 4, list(range(1, 49)),              0.8),
+    ( 36, 211, "Chase Strips",   8, list(range(90, 98)),             0.4),
+    ( 37, 212, "Chase Movers",   8, [80,81,82,83,85,86,87,88],       0.9),
 ]
 
 
@@ -150,20 +151,20 @@ def main():
     # --- PHASE 1: ordered groups. Must run from LIVE.
     if a.phase == "groups":
         print("=== ordered groups (run this from LIVE)")
-        for num, label, steps, chans, cyc in CHASES:
+        for num, grp, label, steps, chans, cyc in CHASES:
             if a.only and num not in a.only:
                 continue
             sel = " + ".join(str(x) for x in chans)
-            print(f"group {num}  {label}  ({len(chans)} chans)")
-            b.newcmd(f"Delete Group {num}", term=True)
+            print(f"group {grp}  {label}  ({len(chans)} chans)")
+            b.newcmd(f"Delete Group {grp}", term=True)
             b.key("enter")                  # answer any confirm
-            e, _ = b.newcmd(f"Chan {sel} Record Group {num}", term=True)
+            e, _ = b.newcmd(f"Chan {sel} Record Group {grp}", term=True)
             if "Error" in e:
-                b.fail(f"group {num}", e)
-            b.newcmd(f"Group {num} Label {label}", term=True)
+                b.fail(f"group {grp}", e)
+            b.newcmd(f"Group {grp} Label {label}", term=True)
 
     # --- PHASE 2: effects. Requires the Effect editor to be focused.
-    for num, label, steps, chans, cyc in CHASES:
+    for num, grp, label, steps, chans, cyc in CHASES:
         if a.phase != "effects" or (a.only and num not in a.only):
             continue
         print(f"effect {num}  {label}  ({steps} steps @ {cyc}s)")
@@ -198,7 +199,7 @@ def main():
         b.key("enter")
         b.key("enter")                      # confirms "Please Confirm"
 
-        b.newcmd(f"Group {num}")
+        b.newcmd(f"Group {grp}")
         b.key("enter")
 
         b.newcmd(f"Effect {num}")

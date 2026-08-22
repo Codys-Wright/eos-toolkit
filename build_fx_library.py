@@ -8,12 +8,12 @@ intensity / chase / texture family that carries a live show.
 
 Opens the Effect editor itself on macOS via eos_focus (Accessibility required).
 
-  PAGE 301-325, five rows:
-    301-305  chase family   - one channel order, five attributes
-    306-310  organic        - sparkle, twinkle, lightning, fire, water
-    311-315  strobes & hits
-    316-320  spatial waves  - across and out from the rig
-    321-325  movers
+  PAGE 1-25, five rows:
+     1-5   chase family   - one channel order, five attributes
+     6-10  organic        - sparkle, twinkle, lightning, fire, water
+    11-15  strobes & hits
+    16-20  spatial waves  - across and out from the rig
+    21-25  movers
 
 Attribute semantics (ETC docs):
   Reverse       steps run 5-4-3-2-1  (key is `reverse_steps`; the bare
@@ -34,35 +34,35 @@ except ImportError:
 # (num, label, group, steps, cycle_seconds, [attribute keys], random_rate_range)
 LIBRARY = [
     # --- chase family: identical channels + steps, different attributes
-    (301, "Chase Fwd",     203,  8, 1.2, [],                  None),
-    (302, "Chase Rev",     203,  8, 1.2, ["reverse_steps"],   None),
-    (303, "Chase Bounce",  203,  8, 1.2, ["bounce"],          None),
-    (304, "Chase Build",   203,  8, 1.6, ["build"],           None),
-    (305, "Chase Negativ", 203,  8, 1.2, ["negative"],        None),
+    (  1, "Chase Fwd",     203,  8, 1.2, [],                  None),
+    (  2, "Chase Rev",     203,  8, 1.2, ["reverse_steps"],   None),
+    (  3, "Chase Bounce",  203,  8, 1.2, ["bounce"],          None),
+    (  4, "Chase Build",   203,  8, 1.6, ["build"],           None),
+    (  5, "Chase Negativ", 203,  8, 1.2, ["negative"],        None),
     # --- organic / random
-    (306, "Sparkle",         3, 16, 0.4, ["random_groups"],   None),
-    (307, "Twinkle",         3, 16, 1.5, ["random_groups"],   None),
-    (308, "Lightning",       3,  4, 0.25,["random_groups"],   "50 Thru 300"),
-    (309, "Fire Flicker",    3, 10, 0.8, ["random_groups"],   "80 Thru 160"),
-    (310, "Water Ripple",  205,  8, 1.6, ["bounce"],          "90 Thru 130"),
+    (  6, "Sparkle",         3, 16, 0.4, ["random_groups"],   None),
+    (  7, "Twinkle",         3, 16, 1.5, ["random_groups"],   None),
+    (  8, "Lightning",       3,  4, 0.25,["random_groups"],   "50 Thru 300"),
+    (  9, "Fire Flicker",    3, 10, 0.8, ["random_groups"],   "80 Thru 160"),
+    ( 10, "Water Ripple",  205,  8, 1.6, ["bounce"],          "90 Thru 130"),
     # --- strobes and hits
-    (311, "Strobe All",      3,  2, 0.15,[],                  None),
-    (312, "Strobe Alt",     25,  2, 0.3, [],                  None),
-    (313, "Strobe Build",    3,  5, 0.3, ["build"],           None),
-    (314, "Stutter",         3,  3, 0.2, ["negative"],        None),
-    (315, "Blinder Hit",     1,  2, 0.2, [],                  None),
+    ( 11, "Strobe All",      3,  2, 0.15,[],                  None),
+    ( 12, "Strobe Alt",     25,  2, 0.3, [],                  None),
+    ( 13, "Strobe Build",    3,  5, 0.3, ["build"],           None),
+    ( 14, "Stutter",         3,  3, 0.2, ["negative"],        None),
+    ( 15, "Blinder Hit",     1,  2, 0.2, [],                  None),
     # --- spatial waves
-    (316, "Wave L to R",   203,  8, 1.5, [],                  None),
-    (317, "Wave R to L",   204,  8, 1.5, [],                  None),
-    (318, "Wave Bounce",   203,  8, 1.5, ["bounce"],          None),
-    (319, "Ripple Out",    205,  6, 1.2, [],                  None),
-    (320, "Ripple In",     206,  6, 1.2, [],                  None),
+    ( 16, "Wave L to R",   203,  8, 1.5, [],                  None),
+    ( 17, "Wave R to L",   204,  8, 1.5, [],                  None),
+    ( 18, "Wave Bounce",   203,  8, 1.5, ["bounce"],          None),
+    ( 19, "Ripple Out",    205,  6, 1.2, [],                  None),
+    ( 20, "Ripple In",     206,  6, 1.2, [],                  None),
     # --- movers
-    (321, "Mvr Kick",      212,  8, 1.0, [],                  None),
-    (322, "Mvr Stab",      212,  8, 0.3, [],                  None),
-    (323, "Mvr Alt",       212,  2, 0.6, [],                  None),
-    (324, "Mvr Build",     212,  8, 1.2, ["build"],           None),
-    (325, "Mvr Random",    212,  8, 0.8, ["random_groups"],   None),
+    ( 21, "Mvr Kick",      212,  8, 1.0, [],                  None),
+    ( 22, "Mvr Stab",      212,  8, 0.3, [],                  None),
+    ( 23, "Mvr Alt",       212,  2, 0.6, [],                  None),
+    ( 24, "Mvr Build",     212,  8, 1.2, ["build"],           None),
+    ( 25, "Mvr Random",    212,  8, 0.8, ["random_groups"],   None),
 ]
 
 

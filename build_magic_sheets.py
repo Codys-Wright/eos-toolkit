@@ -103,7 +103,7 @@ def main():
         ("MS - COLOURS.xml",  rows(cps),                   10, M.TARGETTYPE["palette"], M.PALETTE_LIST["cp"]),
         ("MS - PRESETS.xml",  rows(presets),               10, M.TARGETTYPE["preset"],  None),
         ("MS - FX SUBS.xml",  rows(subs),                  10, M.TARGETTYPE["sub"],     None),
-        ("MS - EFFECTS.xml",  rows(effects, 200, 399),      8, M.TARGETTYPE["effect"],  None),
+        ("MS - EFFECTS.xml",  rows(effects, 1, 99),         5, M.TARGETTYPE["effect"],  None),
         ("MS - FOCUS.xml",    rows(fps),                    9, M.TARGETTYPE["palette"], M.PALETTE_LIST["fp"]),
     ]
     for name, entries, cols, tt, tlid in jobs:
