@@ -25,7 +25,8 @@ both. That is written down in [`docs/`](docs/) so nobody has to rediscover it.
 | [Command line traps](docs/command-line-traps.md) | **Start here.** 11 ways Eos accepts input that does not mean what it looks like |
 | [OSC protocol](docs/osc-protocol.md) | Reading show data: handshake, list convention, what is and is not readable |
 | [File format](docs/file-format.md) | `.esf3d` / `.esf2` anatomy, and why not to build on it |
-| [What can be automated](docs/what-can-be-automated.md) | Capability matrix, including the effect-definition boundary |
+| [What can be automated](docs/what-can-be-automated.md) | Capability matrix |
+| [Authoring effects](docs/authoring-effects.md) | Creating and editing effects over OSC — and the one precondition nobody documents |
 
 ## Tools
 

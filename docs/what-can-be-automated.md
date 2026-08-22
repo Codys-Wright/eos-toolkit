@@ -16,6 +16,9 @@ script, with the result verifiable by reading state back.
 | Presets | yes | yes | yes | yes (confirm) |
 | Submasters | yes | delete+rerecord | yes | yes (confirm) |
 | Scenes | yes (`Cue N Scene <label>`) | — | — | unverifiable* |
+| Effects | yes** | yes** | yes | yes (confirm) |
+
+\*\* requires the Effect editor open on the console — see [Authoring effects](authoring-effects.md)
 
 \* the cue reply has 27 fields and scene is not one of them; confirm visually.
 
@@ -25,33 +28,17 @@ Pan/tilt via `Group N Pan <deg>` / `Tilt <deg>`, readable back on
 
 ## NOT automatable
 
-### Effect definitions — hard boundary
+### Effect definitions — possible, with one precondition
 
-Everything tried, all failed:
+**Effects can be authored over OSC** once a human opens the Effect editor
+(`[Effect] [Effect]`). OSC keys cannot navigate displays, so a script cannot
+open it for itself — but with it open, creation, typing, steps, channels and
+properties are all scriptable.
 
-| Attempt | Result |
-|---|---|
-| `Effect N Enter` | "Effect Does Not Exist" — selects, never creates |
-| `/eos/key/stepbased`, `absolute`, `linear`, `focus_effect`, `color_effect` | no change to type |
-| `Record Effect N` | "Effect Not Running" — even while running |
-| `Record Effect N` after Scale/Rate/Cycletime overrides | still refused |
-| `/eos/key/blind` then `Effect N Enter` | "Effect Does Not Exist" |
-| `Effect N Step 1 Thru 8` | "Effect Not Running" |
-| `display_effects`, `open_pattern_effects`, `effect_edit`, `create_type`, `displays` | editor will not open |
-| `Effect A Copy_To Effect B` | **works** — but a clone behaves identically |
+See **[Authoring effects](authoring-effects.md)** for the full procedure.
 
-**Why:** Rate, Scale, Entry, Exit and Duration exist at two levels — the value
-stored in the *definition*, and a per-instance *override* applied when a channel
-runs the effect. The command line only ever reaches the override. Verified: set
-`Effect 210 Scale 250` while running, definition stays `scale=10`.
-
-That override is still useful — it bakes into a submaster or cue, which is how
-you get genuine variety from a fixed effect library.
-
-**Workaround for designed FX: build them as looping cue lists.** One cue per
-step, `Follow` for step time, last cue `Link`s back to the first. Fully
-authorable, arbitrarily complex, and it can use *your* groups and palettes.
-See `build_chases.py`.
+With the editor CLOSED, every attempt fails with `Error: Effect Does Not Exist`,
+which is what made this look like a hard boundary for a long time.
 
 ### Also GUI-only
 
