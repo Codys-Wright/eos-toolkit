@@ -55,6 +55,8 @@ See [Authoring effects](docs/authoring-effects.md).
 | [Authoring effects](docs/authoring-effects.md) | Creating and editing effects over OSC — and the one precondition nobody documents |
 | [Magic sheets](docs/magic-sheets.md) | Why OSC can't touch them, and the XML import/export path that can |
 | [Authoring macros](docs/authoring-macros.md) | Learn mode doesn't work; the OSC + synthesised-keystroke recipe that does |
+| [Effects model](docs/effects-model.md) | How the effects engine actually works — types, attributes, and the two-level Rate/Scale trap |
+| [Building a show](docs/building-a-show.md) | Recipes and traps for generating cues, groups, palettes, presets and subs at scale |
 
 ## Tools
 

@@ -16,6 +16,8 @@ script, with the result verifiable by reading state back.
 | Presets | yes | yes | yes | yes (confirm) |
 | Submasters | yes | delete+rerecord | yes | yes (confirm) |
 | Scenes | yes (`Cue N Scene <label>`) | — | — | unverifiable* |
+| Macros | yes** | yes** | yes | yes (confirm) |
+| Magic sheets | yes (empty) | via XML import | yes | yes (confirm) |
 | Effects | yes** | yes** | yes | yes (confirm) |
 
 \*\* requires the Effect editor open on the console — see [Authoring effects](authoring-effects.md)
@@ -40,9 +42,19 @@ See **[Authoring effects](authoring-effects.md)** for the full procedure.
 With the editor CLOSED, every attempt fails with `Error: Effect Does Not Exist`,
 which is what made this look like a hard boundary for a long time.
 
-### Also GUI-only
+### Macros — possible, via a hybrid
 
-- Magic sheet creation and editing (contents are not even readable)
+Learn mode does NOT work (OSC commands execute live instead of recording), but
+the Macro Editor does: OSC to navigate, **synthesised keystrokes** to type the
+body. See **[Authoring macros](authoring-macros.md)**.
+
+### Magic sheets — container yes, canvas no
+
+`Record Magic_Sheet`, `Label` and `Delete` all work over OSC. Placing objects
+does not, and contents are unreadable. But sheets **import and export as XML**,
+so they can be generated offline. See **[Magic sheets](magic-sheets.md)**.
+
+### Still GUI-only
 - File operations: New Show, Save As, Partial Show Read, CSV/ASCII export
   (`save_show` is the exception — it is a key and does work)
 - Anything behind a modal dialog. Command-line "Please Confirm" prompts ARE

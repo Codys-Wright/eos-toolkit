@@ -61,6 +61,48 @@ increment setting, not 25 drags.
 Also useful: **Quick Save** sets an undo restore point, and `[Undo] [Enter]`
 returns to it. Worth clicking before any large change.
 
+## TARGETTYPE codes
+
+Determined by importing probe sheets and reading the type labels Eos renders.
+Five probe rounds; the numbers are an undocumented internal enum, so check
+`SHOWFILE_VERSION` (122 here) before trusting them on another release.
+
+```
+  0 None          14 Address        36 Pixel Map
+  2 Cue           20 Channel        45 Fader
+  3 Group         23 User           46 Motor
+  4 Macro         24 Show Control   48 Relay
+  9 Preset        29 Snapshot       51 Processor
+ 10 Sub           33 Magic Sheet    54 Video Stream
+ 13 Effect
+```
+
+**Palettes are ONE type with a sub-selector**, not four codes:
+
+```
+ TARGETTYPE 6 + TARGETLISTID 1=IP  2=FP  3=CP  4=BP
+```
+
+That took five probe sheets. Sweeping 0-87 with both ChannelButton and Button
+objects showed IP at 6 and nothing at 5/7/8 — because every probe inherited
+`TARGETLISTID="1"` from the template, so each palette test was implicitly asking
+for *palette list 1*. One code plus an unvaried parameter, not a gap in the enum.
+
+`TARGETLISTID` also qualifies **cues** — it is the cue list number.
+
+Two further lessons from that hunt:
+
+- **The object you probe with limits what you can discover.** A ChannelButton
+  refuses palette targets, so 60 codes swept with the wrong object type
+  produced a confident wrong answer.
+- **Eos imports any TARGETTYPE without complaint** and re-exports it unchanged.
+  A wrong code yields a sheet that imports "successfully" and silently does
+  nothing. Generated sheets need visual confirmation the first time.
+
+Not found anywhere in 0-87: Command, Scene, Console Button, Softkey, Zoom,
+Selection, Cue-Active, Cue-Pending, Channel-by-Address. For compound actions,
+point a button at a **Macro** (type 4).
+
 ## Object targets available
 
 None, Address, Beam Palette, Channel, Channel (by Address), Color Palette, Cue,
