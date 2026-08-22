@@ -37,6 +37,7 @@ ACTS = {
 # RUNNING ORDER. Reorder this list, re-run, and only the links change.
 ORDER = [100, 200, 300, 400, 500, 600]
 
+LIST = 1                        # which cue list the show lives in
 HAZE = "Chan 100 Thru 101"
 RESET = "Group 1 At 0"          # Group 1 = Rig All; colour/focus persist
 
@@ -132,19 +133,19 @@ class Build:
     def link(self, frm, to):
         """Links must be applied AFTER every cue exists - Eos silently drops a
         link to a cue that isn't there yet."""
-        print(f"link 2/{frm} -> 2/{to}")
-        self.send(f"Cue 2 / {frm} Link 2 / {to}")
+        print(f"link {LIST}/{frm} -> {LIST}/{to}")
+        self.send(f"Cue {LIST} / {frm} Link {LIST} / {to}")
 
     def cue(self, num, label, body, block=False, link=None, up=3):
-        print(f"cue 2/{num}  {label}")
+        print(f"cue {LIST}/{num}  {label}")
         self.send(RESET)
         for c in body:
             self.send(c)
-        self.send(f"Record Cue 2 / {num}")
-        self.send(f"Cue 2 / {num} Label {label}")
-        self.send(f"Cue 2 / {num} Time {up}")
+        self.send(f"Record Cue {LIST} / {num}")
+        self.send(f"Cue {LIST} / {num} Label {label}")
+        self.send(f"Cue {LIST} / {num} Time {up}")
         if block:
-            self.send(f"Cue 2 / {num} Block")
+            self.send(f"Cue {LIST} / {num} Block")
 
 
 
@@ -161,8 +162,8 @@ def main():
     b = Build(conn, a.dry_run)
     todo = a.acts if a.acts else ORDER
     if not a.acts:
-        print("clearing cue list 2")
-        b.send("Delete Cue 2 / 1 Thru 2 / 999", confirm=True)
+        print(f"clearing cue list {LIST}")
+        b.send(f"Delete Cue {LIST} / 1 Thru {LIST} / 999", confirm=True)
 
     for i, block in enumerate(ORDER):
         if block not in todo:
