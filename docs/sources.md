@@ -28,6 +28,10 @@ still the best protocol reference, but it predates Eos 3.x — which is why
 | Magic sheets export/import as **.xml** | Operations Manual p.425 |
 | Magic sheet objects, targets, arrays, Quick Layout | Operations Manual p.416–427 |
 | Scenes: `[Cue] <n> {Attribute} {Scene}` | Online Help, *Cues and Cue Lists > Cue Attributes > Scenes* |
+| Augment3d position syntax, `[Thru]`, partial updates | Operations Manual p.459–460, *Entering Fixture Position & Orientation Data* |
+| **Set Channel Locations From Magic Sheet** | Operations Manual p.471–472, *Augment3d with Magic Sheets & Pixel Maps* |
+| Z is the height axis (floor points share a Z) | Operations Manual p.461, *FPE Points* |
+| Patch = `;` | Keyboard Shortcuts PDF |
 | Step effect attributes (Bounce/Build/Negative/Random) | Online Help + ETC community |
 | Augment3d fixture placement syntax | Operations Manual p.458–459 |
 | Renumbering hazards (FX un-stopping, timecode) | [ETC community thread 28557](https://community.etcconnect.com/control_consoles/eos-family-consoles/f/eos-family/28557/renumbering-cues-and-properties-links-fx-intensity-times-change) |
@@ -49,3 +53,24 @@ experiment, not documentation. The manual does not mention that `Save_Show`
 only works as a key, that `Cuelist N Label` is reparsed as `Chan N Label`, that
 `Record Sub` over an existing sub silently does nothing, that effect authoring
 requires editor focus, or that magic sheet `TARGETTYPE` codes exist at all.
+
+
+## Version traps
+
+Two of the worst time sinks on this project were both **stale documents**, not
+missing ones. Check the version before trusting a page.
+
+- The **Show Control guide is Rev C (2017, Eos 2.x)**. Its OSC appendix is still
+  the best protocol reference, but `augment3d` sub-replies postdate it.
+- A **v2.7 hotkeys PDF** circulates on mirror sites. It is two major versions
+  behind 3.3.9 — do not use it. The Keyboard Shortcuts PDF that ships with the
+  installed app is version-matched and already on disk.
+- Widely circulated hotkey tables are **Windows-oriented**. On macOS, Alt = Option,
+  and a plain `e` is *Recall From*, not Effect.
+
+Both times the answer was already on disk. Search the installed manuals before
+searching the web:
+
+```bash
+pdftotext -layout ~/Downloads/EosFamily_v3.1.0_UserManual_RevA.pdf - | grep -n -i augment3d
+```

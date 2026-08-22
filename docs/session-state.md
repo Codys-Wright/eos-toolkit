@@ -54,9 +54,38 @@ operating model.
 
 ## Open threads
 
-**Augment3d model** — the live one. Positions derived and in
-`a3d_positions.json`; see [rig-model.md](rig-model.md) for method and the four
-open questions. Nothing written to the console yet.
+**Augment3d model** — **DONE**, 2026-08-22. 67 of 69 fixtures placed and
+verified.
+
+Positions came from Eos's own **Set Channel Locations From Magic Sheet**
+(Patch → right-click the Augment3d tab), run against magic sheet 2 (LIGHTING
+POSITIONS) — not from `a3d_positions.json`, which is now superseded for X/Y and
+kept only as the record of intended heights.
+
+The import writes the sheet's second axis into **both Y and Z**, so every
+fixture landed at `z == y`. Corrected with six range commands using the verb
+`Position` (not `Select`, which is a hardware key):
+
+```
+Chan 1 Thru 18 + 20 Thru 48 Position / / 9.08
+```
+
+Empty coordinates mean "no change", so X/Y were preserved — verified: no X/Y
+moved, no address changed. See [rig-model.md](rig-model.md) and traps 13–15.
+
+Coordinates are **sheet units, ~1.65 per metre**, not metres. Deliberate — a
+uniformly scaled model renders identically, and it is one global multiply to
+convert if the stage is ever measured.
+
+Still open on this thread:
+- **Channel 98** — patched floor mover, absent from the magic sheet, no X/Y
+  from any source. Needs operator input.
+- **Channel 19** — unpatched, left at origin on purpose.
+- **Orientation** — every fixture is still `0/0/0` (straight down). Correct for
+  the overhead units, wrong for floor movers 85–88 and 98, which point
+  somewhere else. Never measured.
+- **Never seen by eye.** The whole model is verified *structurally* over OSC.
+  Nobody has confirmed the rendered 3D view looks like the actual room.
 
 **Colour FX macro bank** — agreed but not built. Macros 141–165 pointing at the
 absolute colour effects (800–860) and rainbows (910–919), same stop-then-start

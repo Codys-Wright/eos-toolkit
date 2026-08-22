@@ -144,3 +144,101 @@ See [Authoring effects](authoring-effects.md).
 
 `Record Fx 222` reported OK and created **cue 22/222** — a cue in a cue list,
 from a command about effects. Always re-count after an experimental command.
+
+## 13. `Select` is a KEY, not a command-line word
+
+The Augment3d write path was recorded as
+`[Chan] [1] [Select] [x] [/] [y] [/] [z]`. The brackets mean **keys**, but it
+got transcribed into an OSC command-line string, where `Select` arrives as
+literal text and Eos rejects it:
+
+```
+Chan 44 Select 1 / 2 / 3   -> "Chan 44 Select - Error: Syntax Error"
+Chan 44 Select 1           -> "Chan 44 Select - Error: Syntax Error"
+Chan 44 Select             -> "Chan 44 Select - Error: Syntax Error"
+Chan 44                    -> OK
+```
+
+The error text lands immediately after `Select`, which reads like a *coordinate*
+problem and sends you off tuning number formats. It is not. On macOS:
+
+```
+Select  =  Control + Enter      (System Events)
+Patch   =  ;                    (single keystroke, no modifier)
+```
+
+`/eos/key/patch` does **not** work — there is no OSC key by that name, so it
+falls through to the command line as the word "Patch" and errors. Display
+navigation stays keystroke-only.
+
+Confirmed against ETC's `EosFamily_KeyboardShortcuts.pdf`, which was already
+cited in [sources.md](sources.md) — the answer was on disk the whole time.
+
+## 14. `.` is Cell and `/` is a list separator — decimals are unrepresentable
+
+Even with the channel correctly selected via the real Select key, coordinates
+cannot be typed on the command line. Sending `0.46 / 0.42 / 5.5` parses as:
+
+```
+Chan 44 + 0 Cell 46 : Chan 0 Cell 42 : Chan 5 Cell 5
+```
+
+`.` is the multicell **Cell** separator and `/` separates list items. The whole
+string is read as a *channel selection*, never as coordinates. This is
+structural, not a formatting problem — integers fail the same way.
+
+Harmless, as it happens: a selection is not an assignment, and with no `@` no
+address was written. Verified — channel 44 stayed at address 646 with position
+`[0,0,0, 0,0,0]`. But note how close this sits to `Unpatch`, and re-read the
+patch after any experiment in this display.
+
+## 15. The Augment3d verb is `Position` — `Select` is the *hardware* gesture
+
+Traps 13 and 14 described the failure correctly but drew the wrong conclusion.
+Coordinates **are** enterable from the command line. The missing token was a
+verb:
+
+```
+Chan 44 Select   0.15 / 1.35 / 9.08   -> Syntax Error  (Select = a key, not text)
+Chan 44          0.15 / 1.35 / 9.08   -> parsed as a channel selection
+Chan 44 Position 0.15 / 1.35 / 9.08   -> WORKS
+```
+
+The manual writes the gesture as `[Chan] [1] [Select] [5] [/] [5] [/] [5]`
+because it documents a **console with a keypad**, where `[Select]` opens the
+coordinate-entry mode. Over OSC you want the keyword `Position` instead. Both
+reach the same parser; only one is reachable from a script.
+
+`/` was never the problem. It arrives fine over OSC every time — it only ever
+errored for lack of a verb in front of it. Note the reverse though:
+
+**Synthesised `/` keystrokes are silently dropped.** Typing `//9.08` via System
+Events against `Chan 44` produced `Chan 449 Cell 08` — the slashes vanished and
+the digits appended to the channel number. Neither the main-row slash nor the
+numeric keypad slash (`key code 75`) delivers the token. Send coordinates over
+OSC, not as keystrokes.
+
+### Partial updates and ranges
+
+Empty coordinates mean "no change" and auto-complete to `*`:
+
+```
+Chan 43 Position / / 9.08   -> echoed as "Position * / * / 9.08"
+```
+
+So Z can be rewritten without disturbing X and Y. Ranges work, and a single
+value applies uniformly (two values would interpolate across the range):
+
+```
+Chan 1 Thru 18 + 20 Thru 48 Position / / 9.08
+```
+
+Verified on 67 fixtures at once: no X/Y moved, no address changed.
+
+### Which display
+
+`Position` works from **Patch** (prompt `Patch Channel:`). It does *not* work
+from the Augment3d display (`BLIND: A3D Edit`) — there, `Control+Enter` does
+nothing at all and digits fall back to channel selection. The two are easy to
+confuse: A3D Edit is the rendered 3D view, the Augment3d **tab in Patch** is a
+channel list with XYZ columns.
