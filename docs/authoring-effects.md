@@ -121,3 +121,51 @@ edits the definition. Same words, different target, no error either way.
 The old error `Error: Effect Not Running`, sent from Live with nothing running,
 was what made this look impossible for so long. It means "no instance to
 override", not "this command does not exist".
+
+
+## The two-phase constraint
+
+Building step-based chases needs **both** contexts, and only a human can switch
+between them:
+
+| Phase | Context | Why |
+|---|---|---|
+| 1. ordered groups | **Live** | `Chan ... Record Group N` is a Live command; from the editor it returns `Syntax Error` |
+| 2. effects | **Effect editor** | creation needs display focus |
+
+`/eos/key/live` switches to Live and works. **Nothing gets you back** —
+`/eos/key/effect` twice from OSC just types the words on the command line. A
+human must press `[Effect] [Effect]` again.
+
+So scripts should be split by phase and fail loudly if run in the wrong one:
+
+```
+python3 build_effects.py --phase groups     # from Live
+# human presses [Effect] [Effect]
+python3 build_effects.py --phase effects    # from the editor
+```
+
+Detect the wrong context by checking for `Does Not Exist` on the first
+`Effect <n>` + `enter`, and abort rather than issuing 190 more commands that
+will all silently fail.
+
+## Group order is real but unverifiable over OSC
+
+Channels enter steps in **group storage order**, which is the main design lever.
+But the group reply uses the OSC Number Range format, which compresses to sorted
+ranges:
+
+```
+requested  32,33,34,35,20,21,22,23,11,12,...   (left to right across the stage)
+reads back ['1-18', '20-48']                    (a SET, not a sequence)
+```
+
+A group with no compressible runs reads back as a literal list
+(`[1,3,5,7,...]`), so some groups *look* order-preserving and others do not —
+that is the encoding changing shape, not the data.
+
+Level polling does not resolve it either: one pass of patch queries takes ~3s
+while a chase cycle is under 1s, so samples land at random phases.
+
+**Chase order has to be confirmed by eye.** Everything else about an effect can
+be verified from the console.
