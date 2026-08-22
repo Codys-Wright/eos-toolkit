@@ -1,0 +1,10 @@
+# Show data — this is the user's actual production content, never commit it
+show.json
+show.md
+show.raw.txt
+*.esf2
+*.esf3d
+
+__pycache__/
+*.pyc
+.DS_Store
