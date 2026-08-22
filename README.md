@@ -18,6 +18,27 @@ documents and supports. This toolkit uses that.
 Along the way we hit a lot of behaviour that is undocumented, silently wrong, or
 both. That is written down in [`docs/`](docs/) so nobody has to rediscover it.
 
+## The one thing to know about effects
+
+Everything in Eos is scriptable over OSC **except display navigation**.
+`/eos/key/effect` reaches the command line but never moves the UI.
+
+That matters for exactly one workflow: **effects**. Creating or editing an
+effect requires the Effect editor to have focus. So:
+
+```
+1. A human presses [Effect] [Effect] on the console   <- the only manual step
+2. A script then creates, types, builds steps, assigns
+   channels and sets properties, all over OSC
+```
+
+With the editor closed, every effect write fails with
+`Error: Effect Does Not Exist` — no other symptom. This single precondition is
+undocumented by ETC and is the difference between "effects are impossible to
+automate" and "effects are fully scriptable".
+
+See [Authoring effects](docs/authoring-effects.md).
+
 ## Documentation
 
 | | |

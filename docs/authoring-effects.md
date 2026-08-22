@@ -1,5 +1,11 @@
 # Authoring effects over OSC
 
+> **TL;DR** — A human presses `[Effect]` `[Effect]` once to open the Effect
+> editor. From then on a script can create and edit effects over OSC. The human
+> does not do the editing; they only provide display focus, which OSC cannot.
+> Close the editor and every write silently fails with
+> `Error: Effect Does Not Exist`.
+
 **Effects CAN be created and edited over OSC** — but only while the **Effect
 editor display is open on the console**. This one precondition is the difference
 between "impossible" and "fully scriptable", and nothing in the OSC

@@ -122,7 +122,25 @@ No error; the link reads back as 0. Build all cues, then link in a second pass.
 Cue times, follow, hang, loop and link all use `-1` for *not independently set*.
 Dividing by 1000 for display yields `-0.001s`. Render it as em-dash.
 
-## 11. Stray side effects from invalid commands
+## 11. Effect writes silently fail unless the Effect editor is open
+
+```
+Effect 200  [Enter]     (editor closed)  -> "Error: Effect Does Not Exist"
+Effect 200  [Enter]     (editor open)    -> "Effect 200 Create Type" + softkeys
+```
+
+OSC key presses do not navigate displays, so a script cannot open the editor for
+itself. A human presses `[Effect] [Effect]` once; the script does the rest.
+Detect focus by watching softkeys:
+
+```
+closed -> Address | Query | Snapshot | Highlight | Assert | ...
+open   -> Edit | Properties | Icon | Offset
+```
+
+See [Authoring effects](authoring-effects.md).
+
+## 12. Stray side effects from invalid commands
 
 `Record Fx 222` reported OK and created **cue 22/222** — a cue in a cue list,
 from a command about effects. Always re-count after an experimental command.
