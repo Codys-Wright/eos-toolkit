@@ -48,7 +48,7 @@ See [Authoring effects](docs/authoring-effects.md).
 
 | | |
 |---|---|
-| [Command line traps](docs/command-line-traps.md) | **Start here.** 19 ways Eos accepts input that does not mean what it looks like |
+| [Command line traps](docs/command-line-traps.md) | **Start here.** 20 ways Eos accepts input that does not mean what it looks like |
 | [OSC protocol](docs/osc-protocol.md) | Reading show data: handshake, list convention, what is and is not readable |
 | [File format](docs/file-format.md) | `.esf3d` / `.esf2` anatomy, and why not to build on it |
 | [What can be automated](docs/what-can-be-automated.md) | Capability matrix |
@@ -58,6 +58,7 @@ See [Authoring effects](docs/authoring-effects.md).
 | [Effects model](docs/effects-model.md) | How the effects engine actually works — types, attributes, and the two-level Rate/Scale trap |
 | [Building a show](docs/building-a-show.md) | Recipes and traps for generating cues, groups, palettes, presets and subs at scale |
 | [The Norco location](docs/norco-location.md) | The venue: room dimensions, the Augment3d scene, and where all 70 fixtures live |
+| [The busking fader system](docs/busking-faders.md) | Five fader pages, the `Fader P / F Sub N` mapping syntax, and the one thing no API can set |
 
 ## Tools
 
@@ -112,6 +113,7 @@ matches. All verify by reading state back, and all save via the key that works.
 |---|---|
 | `a3d_room.py` | the whole Augment3d room from two numbers — stage width and depth in feet. Edits `working.a3d` in an extracted show; see [The Norco location](docs/norco-location.md) |
 | `build_rig_positions.py` | positions and aims all 70 fixtures over OSC, then verifies every one by read-back |
+| `build_busking_faders.py` | five pages of busking faders — subs, contents, labels and times |
 
 ## Tests
 

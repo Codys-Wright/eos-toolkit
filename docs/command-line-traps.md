@@ -333,3 +333,21 @@ type.
 Same page: **Hang to Focus Offset X/Y/Z**, the offset from the base to the
 pan/tilt pivot, used when converting an XYZ beam target to pan/tilt. Left at
 zero, aimed positions on movers are slightly off.
+
+## 20. `Fader <n>` wraps instead of erroring
+
+Fader pages hold **10** faders. Addressing a fader beyond that does not error —
+it silently relocates:
+
+```
+Fader 1 / 11 Sub 41   ->  "Fader 1 / 11 Mapped To Sub 41"   ... lands on page 2 fader 1
+Fader 20 Sub 20       ->  "Fader 1 / 20 Mapped To Sub 20"   ... lands on page 2 fader 10
+```
+
+That overwrote an entire page of content that had just been mapped, and the
+echo confirmed success both times. Always address faders as
+`Fader <page> / <fader>` and keep `<fader>` in 1–10.
+
+Capacity is also not uniform, so probe before designing a layout — on this
+console page 3 has only faders 1, 9 and 10, and pages 6+ do not exist. See
+[The busking fader system](busking-faders.md).
