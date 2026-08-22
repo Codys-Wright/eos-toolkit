@@ -191,6 +191,10 @@ building a wrong command line.
 macOS:  Effect  =  Option + E
 ```
 
+Confirmed against ETC's own `EosFamily_KeyboardShortcuts.pdf`, which lists
+`Effect  Alt E` — Alt being Option on a Mac keyboard. Also useful from that
+table: `[Expand] & [Effect]` opens the Effect Status Display (Tab 8).
+
 ### The gesture is timing sensitive
 
 `[Effect] [Effect]` must be two presses in quick succession. Sent 1.2s apart

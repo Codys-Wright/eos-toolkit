@@ -53,6 +53,7 @@ See [Authoring effects](docs/authoring-effects.md).
 | [File format](docs/file-format.md) | `.esf3d` / `.esf2` anatomy, and why not to build on it |
 | [What can be automated](docs/what-can-be-automated.md) | Capability matrix |
 | [Authoring effects](docs/authoring-effects.md) | Creating and editing effects over OSC — and the one precondition nobody documents |
+| [Magic sheets](docs/magic-sheets.md) | Why OSC can't touch them, and the XML import/export path that can |
 
 ## Tools
 
