@@ -8,7 +8,7 @@ groups never alters recorded cues.
 
   PAGE 1  (1-25)   GLOBAL   - the everyday reach-for selections
   PAGE 2  (26-50)  PARS     - banks, patterns and splits across chans 1-48
-  PAGE 3  (51-75)  MOVERS   - overhead (80-83) and beam (85-88, 98)
+  PAGE 3  (51-75)  MOVERS   - overhead (80-83) and beam (85-88)
   PAGE 4  (76-100) STRIPS   - strips, slimpars, haze, individual fixtures
 
   python3 build_groups.py --dry-run
@@ -57,13 +57,13 @@ PAGES = {
     ( 1, "Rig All",      "1 Thru 98"),
     ( 2, "Wash All",     "1 Thru 48 + 50 Thru 53"),
     ( 3, "Pars All",     "1 Thru 48"),
-    ( 4, "Movers All",   "80 Thru 83 + 85 Thru 88 + 98"),
+    ( 4, "Movers All",   "80 Thru 83 + 85 Thru 88"),
     ( 5, "Strips",       "90 Thru 97"),
     ( 6, "SlimPars",     "50 Thru 53"),
     ( 7, "Movers OH",    "80 Thru 83"),
-    ( 8, "Movers Beam",  "85 Thru 88 + 98"),
+    ( 8, "Movers Beam",  "85 Thru 88"),
     ( 9, "Haze",         "100 Thru 101"),
-    (10, "Mvr + Strip",  "80 Thru 83 + 85 Thru 88 + 90 Thru 97 + 98"),
+    (10, "Mvr + Strip",  "80 Thru 83 + 85 Thru 88 + 90 Thru 97"),
     (11, "Left All",     LEFT_ALL),
     (12, "Centre All",   CENTRE_ALL),
     (13, "Right All",    RIGHT_ALL),
@@ -112,9 +112,9 @@ PAGES = {
 3: [  # ---- MOVERS / STRIPS / SLIMPARS - multi-fixture selections only.
       # Single fixtures are reachable by typing the channel; a group would
       # just take up a tile.
-    (51, "Movers All",    "80 Thru 83 + 85 Thru 88 + 98"),
+    (51, "Movers All",    "80 Thru 83 + 85 Thru 88"),
     (52, "Movers OH",     "80 Thru 83"),
-    (53, "Movers Beam",   "85 Thru 88 + 98"),
+    (53, "Movers Beam",   "85 Thru 88"),
     (54, "Mvr Left",      "80 + 85"),
     (55, "Mvr Right",     "83 + 88"),
     (56, "OH Outer",      "80 + 83"),
@@ -131,7 +131,7 @@ PAGES = {
     (67, "Mvr Inner All", "81 Thru 82 + 86 Thru 87"),
     (68, "Mvr Left All",  "80 Thru 81 + 85 Thru 86"),
     (69, "Mvr Right All", "82 Thru 83 + 87 Thru 88"),
-    (70, "Mvr + Strip",   "80 Thru 83 + 85 Thru 88 + 90 Thru 97 + 98"),
+    (70, "Mvr + Strip",   "80 Thru 83 + 85 Thru 88 + 90 Thru 97"),
     (71, "Strips All",    "90 Thru 97"),
     (72, "Strips Back",   "90 Thru 94"),
     (73, "Strips Left",   "90 + 93 + 95"),

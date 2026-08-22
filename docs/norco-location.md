@@ -163,49 +163,94 @@ treatment.
 
 ## The rig
 
-70 fixtures. `build_rig_positions.py` places and aims all of them; every
-position derives from named constants (`SEAM`, `FRONT`, `AUD_1_3`, `AUD_FAR`,
-`PIPE`, `FAN_OUT/FAN_IN`), so moving a row repositions *and* re-aims it.
+70 channels, 8 of which the operator positions by hand. `build_rig_positions.py`
+places and aims the other 57; every position derives from named constants, so
+moving a row repositions *and* re-aims it.
+
+### Who owns what
+
+**The builder must never write channels 85–88 or 90–97.** Those are positioned
+by hand in Augment3d. An earlier version of the script wrote all 70 on every
+run and silently destroyed that work several times. They are now fenced off
+with a comment block.
+
+Recovering an overwrite is possible: `working.a3d` carries
+`Scene/Patch.json`, a mirror of the fixture positions at save time. Read the
+operator's last save and restore from it.
+
+### Layout
 
 ```
-y  1.80   40,41,47,48          upstage
-y  1.20   42,46                drum-kit corners, aimed at the kit
-y -1.01   32-39, 43-45         13 ft seam; 32-39 panned inward, 43-45 straight
-y -2.70   24-27                mid stage, fanned
+y  2.20   80-83                overhead movers on truss
+y  1.80   40,41,47,48          nearest the upstage wall - back-wall wash, 50.6 deg
+y  1.20   42,46                drum-kit corners, aimed at the kit (the one
+                               deliberate convergence in the rig)
+y -1.01   32-39, 43-45         the 13 ft seam
+y -1.25   85-88 + 3,4,5,6      floor movers (operator-placed) with 3-6 outboard
+y -2.70   24-27                mid stage
 y -3.76   7-10, 20-23, 28-31   stage lip, in line with the speaker array
-y -7.42   3-6, 11-18           12 ft out  (6 ceiling tiles)
-y -9.86   1, 2                 20 ft out, singles at x +-5.00
+y -7.42   11-14 / 15-18        two angled trusses, 18 deg, centre gap
+y -9.86   1, 2                 furthest downstage, centre pair
 ```
 
-Pars hang at `z 3.25`, 8 in under the ceiling. Overhead movers 80–83 on truss
-at `z 3.20`, y 2.20. Floor beams 85–88 + 98 at y −1.30 on the deck, aimed up.
-Slimpars 50–53 on the upstage wall, aimed downstage.
+Pars hang at `z 3.25`, 8 in under the ceiling.
 
-### The eight bar lights
+### Aiming: wash, not convergence
 
-The channel count validates the mapping — six 7-channel and two 3-channel,
-matching exactly six + two described positions:
+**Fixtures cover the patch of stage they are over.** Stage-left cans light
+stage left. They do *not* all point at centre.
 
-| Channels | Type | Position |
-|---|---|---|
-| 90, 91, 92 | 7ch | uplighting the three upstage TVs (x −3.50 / 0 / +3.50) |
-| 93, 97, 94 | 7ch | footlights at the foot of the stage end (x −3.00 / 0 / +3.00) |
-| 95, 96 | **3ch** | uplighting the two side (flare) TVs, x ±4.90 |
+In practice that means `pan = 0` with a gentle splay, and the aim target takes
+the fixture's **own x**, never a shared centre point:
 
-### Fan
+```python
+tx = x                      # not x*k toward centre
+th, _ = aim(x, y, PIPE, tx, TARGET_Y, TARGET_Z)
+```
 
-Groups of four splay outward: `-12, -4, +4, +12` degrees. Applied to 20–23,
-28–31, 11–14, 15–18 and 24–27. Channels 32–39 keep a hard inward cross instead
-— they are the one angled group per side. Pairs are not fanned.
+An earlier build aimed 32–39 at `x*0.45`, producing pan angles of ±76° to ±82°
+— cross-light straight across the stage. Now every fixture lands within about
+6 cm of directly beneath itself, splayed by the fan.
+
+**Fan.** Groups of four splay outward `-12, -4, +4, +12` degrees. Applied to
+20–23, 28–31, 11–14, 15–18, 24–27, 32–35, 36–39. Pairs are not fanned.
+
+The only intentional convergence is 42/46 onto the drum kit, at ±104°.
+
+### Movers: orientation is the hang, not the aim
+
+For a moving head, the Augment3d orientation is **how the fixture is rigged** —
+the yoke's mounting angle. The beam direction comes from pan/tilt at showtime.
+
+```
+80-83   eul (0, 0, 0)       hung straight down from the truss
+85-88   eul (180, 0, 0)     floor units, inverted
+```
+
+Computing an *aim* for a mover and writing it as orientation is wrong twice
+over: it draws the fixture bolted on at a false angle, and it offsets every
+pan/tilt value and focus palette recalled on it.
+
+### Phantom channels
+
+**19 and 98 are unpatched** — `address == 0`. They emit nothing. Channel 98
+had propagated into the rig inventory, the group definitions and the Augment3d
+model as a ghost ninth mover before anyone checked its address. There are
+**8 movers, not 9**.
+
+```python
+if patch_entry["address"] == 0: ...   # unpatched; do not place, do not group
+```
+
+An addressless fixture is harmless on stage and *not* harmless in a visualiser
+— it still renders as geometry.
 
 ### Known-approximate
 
-- **Tilt is capped at 65°.** Both audience rows hit the cap, so they aim
-  parallel rather than the far row raking flatter. Geometry wants ~70° and ~74°.
-- **Channels 1 and 2 point straight upstage**; a lone side par would normally
-  toe in.
-- **Ceiling height is an estimate**, not a measurement. Everything vertical
-  scales off it.
+- **Tilt is capped at 65°.** Both audience trusses hit the cap, so they aim
+  parallel rather than the far end raking flatter.
+- **Ceiling height is an operator estimate**, not a measurement. Everything
+  vertical scales off it.
 
 ## Ceiling tiles as a measuring tool
 
