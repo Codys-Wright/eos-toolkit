@@ -1,10 +1,10 @@
 # Authoring effects over OSC
 
-> **TL;DR** — A human presses `[Effect]` `[Effect]` once to open the Effect
-> editor. From then on a script can create and edit effects over OSC. The human
-> does not do the editing; they only provide display focus, which OSC cannot.
-> Close the editor and every write silently fails with
-> `Error: Effect Does Not Exist`.
+> **TL;DR** — Effect authoring requires the Effect editor to have focus, and
+> OSC cannot navigate displays. Either a human presses `[Effect]` `[Effect]`,
+> **or** on macOS a script sends that gesture via System Events (see
+> [Closing the loop](#closing-the-loop-macos) below) and needs no human at all.
+> Without focus, every write fails with `Error: Effect Does Not Exist`.
 
 **Effects CAN be created and edited over OSC** — but only while the **Effect
 editor display is open on the console**. This one precondition is the difference
@@ -169,3 +169,79 @@ while a chase cycle is under 1s, so samples land at random phases.
 
 **Chase order has to be confirmed by eye.** Everything else about an effect can
 be verified from the console.
+
+
+## Closing the loop (macOS)
+
+OSC cannot navigate displays, but macOS System Events can — and it ships with
+the OS, so nothing needs installing.
+
+**Requires** System Settings > Privacy & Security > **Accessibility** > enable
+whichever app runs the script. Without it, osascript fails with
+`not allowed to send keystrokes. (1002)`.
+
+### The Mac hotkey is NOT the published one
+
+The widely circulated Eos hotkey tables are Windows-oriented and list
+**Ctrl+E** for the Effect key. On macOS that arrives as a plain `e`, which is
+**Recall From** — a completely different command that will happily start
+building a wrong command line.
+
+```
+macOS:  Effect  =  Option + E
+```
+
+### The gesture is timing sensitive
+
+`[Effect] [Effect]` must be two presses in quick succession. Sent 1.2s apart
+they register as two separate Effect keypresses and the editor does not open.
+Sent ~80ms apart, in a single osascript, it works:
+
+```applescript
+tell application "System Events"
+  keystroke "e" using {option down}
+  delay 0.08
+  keystroke "e" using {option down}
+end tell
+```
+
+### Confirming focus over OSC
+
+The editor publishes a distinctive softkey set, so a script can verify rather
+than assume:
+
+```
+Live         -> Address | Query | Snapshot | Highlight | Assert | ...
+Effect key   -> Size | Replace With | Offset | Axis | Edit | BPM | Rate | ...
+EDITOR OPEN  -> Step | In Time | On State | InsrtBefore | Properties | ...
+```
+
+The command-line prompt also changes from `LIVE: Cue 22 / 6 :` to
+`BLIND: Effect 203 :`.
+
+`eos_focus.py` wraps all of this. `build_effects.py` calls it automatically when
+it detects an unfocused editor, so the effects phase now needs no human step.
+
+### Verified end to end
+
+Created, typed, stepped, channel-assigned, cycle-timed, labelled, read back and
+deleted — with no human input at any point:
+
+```
+stepbased  -> Effect 230 Create Type StepBased #
+fx 230     -> {type: StepBased, entry: Cascade, scale: 100}
+step 1 Thru 4, Group 212, CycleTime 1.5, Label "Auto Built"
+RESULT     -> {label: "Auto Built", type: StepBased, entry: Cascade, scale: 100}
+```
+
+### What is still out of reach
+
+Accessibility grants **keystrokes only**. Screen Recording is a separate
+permission; without it `screencapture` fails with
+`could not create image from rect`, so a script still cannot *see* the screen.
+Eos is a Qt app that paints its own UI, so the accessibility tree exposes only a
+handful of popup buttons and no display tabs — reading UI state means
+screenshots, not the tree.
+
+Still unreadable either way: magic sheet contents, scene markers, palette
+values, effect step contents.

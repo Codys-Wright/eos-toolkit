@@ -27,10 +27,15 @@ That matters for exactly one workflow: **effects**. Creating or editing an
 effect requires the Effect editor to have focus. So:
 
 ```
-1. A human presses [Effect] [Effect] on the console   <- the only manual step
+1. Something must press [Effect] [Effect] to give the editor focus
 2. A script then creates, types, builds steps, assigns
    channels and sets properties, all over OSC
 ```
+
+On **macOS** step 1 can be automated too — `eos_focus.py` sends the gesture via
+System Events, so no human is needed. It requires the Accessibility permission,
+and note that the Mac hotkey is **Option+E**, not the Ctrl+E published in the
+Windows hotkey tables.
 
 With the editor closed, every effect write fails with
 `Error: Effect Does Not Exist` — no other symptom. This single precondition is

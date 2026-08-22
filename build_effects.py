@@ -19,6 +19,10 @@ without touching the effect.
 """
 import argparse, sys, time
 import eosdump as E
+try:
+    import eos_focus
+except ImportError:
+    eos_focus = None
 
 def seq(*blocks):
     out = []
@@ -168,8 +172,20 @@ def main():
 
         b.newcmd(f"Effect {num}")
         e, sk = b.key("enter")
+        if "Does Not Exist" in e and eos_focus and not a.dry_run:
+            # Display focus is the one thing OSC cannot do. Reach for macOS
+            # System Events, then retry once.
+            print("   editor not focused - opening it via System Events")
+            try:
+                eos_focus.open_effect_editor()
+                b.newcmd(f"Effect {num}")
+                e, sk = b.key("enter")
+            except Exception as ex:
+                b.fail(f"effect {num}", f"could not open editor: {ex}")
+                break
         if "Does Not Exist" in e:
-            b.fail(f"effect {num}", "EFFECT EDITOR IS NOT OPEN - press [Effect][Effect]")
+            b.fail(f"effect {num}", "EFFECT EDITOR IS NOT OPEN - press [Effect][Effect] "
+                                    "(or grant Accessibility so this can do it)")
             print("\nABORTING: open the Effect editor and re-run.", file=sys.stderr)
             break
         b.key("stepbased")
