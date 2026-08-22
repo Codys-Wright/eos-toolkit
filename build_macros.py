@@ -5,8 +5,12 @@ Build one-press FX macros on a live Eos console.
 THE WORKFLOW PROBLEM
 Applying an effect normally takes two steps: select channels, then choose the
 effect. A macro collapses that to one button - and unlike a submaster it brings
-no intensity of its own, so it LAYERS onto whatever the cue already has.
+no intensity of its own, so it sits on top of whatever the cue already has.
 Set the colour palette in the cue, then fire an FX macro on top.
+
+Each macro stops all running effects first, so the buttons REPLACE one another
+instead of stacking. For layering two effects at once, use the FX submasters
+(101-137) instead - those are additive by design.
 
 WHY MACROS AND NOT PRESETS OR SUBS
   presets  - cannot hold an effect (the preset `fx` field stays empty whether
@@ -212,7 +216,12 @@ def main():
         print("opening the Macro Editor ([Macro][Macro] via System Events)")
         open_macro_editor()
 
-    jobs = [(num, ["group"] + digits(grp) + ["effect"] + digits(fx) + ["enter"], lab)
+    # Each FX macro STOPS every running effect before starting its own, so the
+    # buttons are mutually exclusive - pressing one replaces the last rather
+    # than stacking. "Group 1 Effect [Enter]" with no effect number is Eos's
+    # stop flag; it kills effects without touching levels or colour.
+    STOP = ["group", "1", "effect", "enter"]
+    jobs = [(num, STOP + ["group"] + digits(grp) + ["effect"] + digits(fx) + ["enter"], lab)
             for num, grp, fx, lab in FX_MACROS]
     jobs.append((STOP_MACRO[0], ["group", "1", "effect", "enter"], STOP_MACRO[1]))
 

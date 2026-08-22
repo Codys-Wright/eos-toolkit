@@ -68,6 +68,24 @@ Macro 101 "FX Chase Fwd"  ->  Group 2 0 3 Effect 1 \r
 Digits arrive separately because they are individual keypresses; Eos assembles
 them. That is the correct stored form.
 
+## Making FX buttons mutually exclusive
+
+An effect started by a macro keeps running when you fire the next one - they
+stack, because nothing stopped the first. `Group <n> Effect [Enter]` with no
+effect number is Eos's **stop flag**: it kills running effects on those channels
+without touching levels or colour.
+
+So each FX macro is stop-then-start:
+
+```
+Group 1 Effect ⏎          stop every running effect (group 1 = chans 1-98)
+Group 203 Effect 1 ⏎      start this one
+```
+
+Now the buttons behave like radio buttons. For layering two effects at once,
+use submasters instead - those are additive by design, and their faders let you
+ride the depth.
+
 ## The focus hazard
 
 System Events types into **whatever app is frontmost**. If focus moves mid-run,
