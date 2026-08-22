@@ -32,15 +32,29 @@ Truss, Pipe, Triangle, Pentagon.
 TARGETTYPE codes, confirmed by importing a probe sheet and reading the type
 labels Eos renders on each button:
 
-     0  None        13  Effect
-     2  Cue         14  Address
-     3  Group       20  Channel
-     4  Macro       23  User
-     9  Preset      24  Show Control
-    10  Sub         29  Snapshot
+     0  None        14  Address       36  Pixel Map
+     2  Cue         20  Channel       45  Fader
+     3  Group       23  User          46  Motor
+     4  Macro       24  Show Control  48  Relay
+     9  Preset      29  Snapshot      51  Processor
+    10  Sub         33  Magic Sheet   54  Video Stream
+    13  Effect
 
-Palettes are not in 0-29. TARGETTYPE 45 appears on Fader objects, so they are
-probably in the 30-59 range - use --probe-sheet with --lo/--hi to find them.
+PALETTES are one type with a sub-selector, not four separate codes:
+
+     TARGETTYPE 6 + TARGETLISTID 1=IP  2=FP  3=CP  4=BP
+
+That took five probe sheets to find. Probing codes 0-87 with both ChannelButton
+and Button objects showed IP at 6 and nothing at 5/7/8, because every probe
+inherited TARGETLISTID="1" from the template - so every palette test was
+implicitly asking for "palette list 1". One code and an unvaried parameter, not
+a gap in the enum.
+
+TARGETLISTID also qualifies CUES (it is the cue list number).
+
+NOT FOUND anywhere in 0-87: Command, Scene, Console Button, Softkey, Zoom,
+Selection, Cue-Active, Cue-Pending, Channel-by-Address. For compound actions,
+point a button at a MACRO (type 4) instead.
 
 NOTE: Eos imports ANY targettype without complaint and re-exports it unchanged,
 so a wrong code produces a sheet that imports "successfully" and does nothing.
@@ -64,9 +78,19 @@ TARGETTYPE = {
     "user":     23,
     "showcontrol": 24,
     "snapshot": 29,
-    # palettes are NOT in 0-29; TARGETTYPE 45 was observed on Fader objects,
-    # so intensity/focus/colour/beam palettes are likely in the 30-59 range.
+    "magicsheet": 33,
+    "pixelmap":   36,
+    "fader":      45,
+    "motor":      46,
+    "relay":      48,
+    "processor":  51,
+    "videostream": 54,
+    # Palettes are ONE type with a sub-selector, not four codes:
+    #   TARGETTYPE 6 + TARGETLISTID 1=IP 2=FP 3=CP 4=BP
+    "palette":     6,
 }
+
+PALETTE_LIST = {"ip": 1, "fp": 2, "cp": 3, "bp": 4}
 
 
 def load(path):
@@ -87,7 +111,7 @@ def find_template(tree, key):
 
 def set_item(item, x=None, y=None, w=None, h=None,
              targettype=None, targetid=None, text=None, cmd=None,
-             fill=None):
+             fill=None, targetlistid=None):
     if x is not None:
         item.set("POSX", str(x))
     if y is not None:
@@ -107,6 +131,8 @@ def set_item(item, x=None, y=None, w=None, h=None,
             tg.set("TARGETTYPE", str(targettype))
         if targetid is not None:
             tg.set("TARGETID", str(targetid))
+        if targetlistid is not None:
+            tg.set("TARGETLISTID", str(targetlistid))
     tx = item.find("ITEMDATA/MAGICSHEET/TEXT")
     if tx is not None and text is not None:
         tx.set("STR", text)
