@@ -54,53 +54,54 @@ operating model.
 
 ## Open threads
 
-**Augment3d model** — **DONE**. The room is modelled to the real venue and all
-70 fixtures are placed, aimed and verified. See
-[norco-location.md](norco-location.md) for every dimension, the coordinate
-convention, the scene-file mechanics and the rig layout.
+Everything below is the state as of the end of the Norco build session. See
+[norco-location.md](norco-location.md), [busking-faders.md](busking-faders.md)
+and [show-cues.md](show-cues.md) for the detail.
 
-Two scripts reproduce it:
+### Done and verified
 
-```bash
-python3 a3d_room.py <extracted-show-dir> 30 22   # room, from stage W x D in feet
-python3 build_rig_positions.py --send            # all 70 fixtures, positions + aim
-```
+- **The room** is modelled to the real venue and loaded on the console. Built by
+  `a3d_room.py` from two numbers (stage width x depth in feet).
+- **The rig**: 57 fixtures placed and aimed by `build_rig_positions.py`, every
+  one confirmed by read-back. 12 more (movers 85-88, bars 90-97) are
+  operator-placed and **the builder must not write them**.
+- **Direct selects**: four banks of ten — groups, colour, focus, beam.
+- **Colour palettes 1-10** rebuilt with explicit RGB and verified by reading hue
+  back. Yellow is 26 deg off Orange, Purple 30 deg off Magenta; both were
+  near-identical before.
+- **Busking faders**: five pages built, mapped, timed and filtered by
+  `build_busking_faders.py`; the button actions set by hand in Tab 36 and read
+  back clean.
 
-Still approximate, in priority order:
+### Done but NOT verified
 
-- **Ceiling height is an operator estimate (12 ft), not a measurement.**
-  Everything vertical scales off it — the 3.25 m par trim, every tilt angle,
-  the booth partition height.
-- **Tilt is capped at 65°**, so both audience rows aim parallel instead of the
-  far row raking flatter. Geometry wants ~70° and ~74°.
-- **Channels 1 and 2** point straight upstage; a lone side par usually toes in.
-- **Pairs are not fanned** — only groups of four are.
+- **The 18 song cues.** `build_song_looks.py` recorded a look and a vibe note
+  for every song. The notes are confirmed on screen. **The colours are not.**
+  The first build recorded 18 identical cues because of
+  [trap 21](command-line-traps.md); the rebuild is believed correct but every
+  measurement of it was polluted — fader 6 was up at 60% running a colour
+  effect, and averaging the whole render cannot distinguish a multi-colour look.
+  **Verify one zone at a time, with all faders at zero and the cue list out.**
 
-**Busking layout** — direct selects built and verified, four banks of ten:
+### Not started
 
-```
-groups   Rig All, Pars All, Movers All, Strips, SlimPars,
-         Front/Mid/Back Wash, Left All, Right All
-colour   Red Orange Yellow Green Cyan Blue Purple Magenta WarmWhite ColdWhite
-focus    OH Up/Centre Ceiling/Centre Up/Side Walls, Beam Ceiling/Ctr/Drum/
-         Side Walls/Cross Corners/Floor Ctr
-beam     Open, Spots Big, Spots Small, Stars, Star, Flower, Flower Fat,
-         Spiral, X, Zebra
-```
+- **A global effect rate fader.** Set any fader's *slider* to `Effect Rate` in
+  Tab 36 — it needs no content and controls every running effect. Page 2 fader
+  10 (`RIG`) is the most redundant slot. No command-line path exists.
+- **A hardware shutter strobe.** `Chan N Shutter <n>` is accepted, so the pars
+  have the parameter; the ranges are unknown.
+- **Chases 32-36, 38, 40 have no fader** — page 3 only has three usable slots
+  until its reserved faders are freed in Setup.
 
-Palettes were duplicated by **recall-then-record**, not `Copy To` (which is a
-key, not command-line text). Beam originals were stashed at 101–108 first
-because sources and targets overlapped.
+### Known-approximate
 
-Known gaps in that bank: `Open` (BP 1) only covers channels 80–83 — no
-open-gobo palette exists anywhere for the floor beams 85–88. Focus palettes
-5–10 cover 85–88 but not 98. Beam palettes 2, 3, 4, 7, 9, 10 carry junk
-channels (pars and strips inside a gobo palette) inherited from a rig-wide
-original.
-
-**Faders** — only partly scriptable; see [trap 18](command-line-traps.md).
-Timing and mode work from the command line; intensity master, effect mode,
-solo, exclude-solo, freeze and rate ranges are Tab 36 and mouse-only.
+- **Ceiling height is an operator estimate** (12 ft), not a measurement.
+  Everything vertical scales off it.
+- **Tilt is capped at 65 deg**, so both audience trusses aim parallel instead of
+  the far one raking flatter.
+- **Channels 19 and 98 are unpatched** (address 0) and deliberately unplaced.
+- **Fader pages 4-5 button config** was read back clean *before* the last two
+  fixes, not after.
 
 **Colour FX macro bank** — agreed but not built. Macros 141–165 pointing at the
 absolute colour effects (800–860) and rainbows (910–919), same stop-then-start
