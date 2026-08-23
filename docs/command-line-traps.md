@@ -351,3 +351,68 @@ echo confirmed success both times. Always address faders as
 Capacity is also not uniform, so probe before designing a layout — on this
 console page 3 has only faders 1, 9 and 10, and pages 6+ do not exist. See
 [The busking fader system](busking-faders.md).
+
+## 21. `At <level>` and `Color_Palette` in one command: the palette is dropped
+
+The single worst silent failure found so far.
+
+```
+Chan 1 Thru 48 At Full          then  Chan 1 Thru 48 Color_Palette 6   -> BLUE
+Chan 1 Thru 48 At Full Color_Palette 6                                 -> no colour
+```
+
+Measured off the Augment3d render: split gives `R49 G57 B165`, combined gives
+`R131 G125 B93`. The level applies, the palette is discarded, and the echo
+reports the whole string back as though it worked:
+
+```
+LIVE: Cue 110 : Chan 12 @ 80 Color Palette 6 #
+```
+
+This built 18 song cues that all recorded the same colour before anyone noticed.
+**Always send level and palette as separate commands.** The same split applies to
+`Focus_Palette`.
+
+## 22. `Record Cue 1/110` fails; `Record Cue 1 / 110` works
+
+The list/cue separator needs spaces, exactly like the fader syntax.
+
+```
+Record Cue 1/110 Label X    ->  "Record Cue 100 1/110 - Error: Syntax Error"
+Record Cue 1 / 110 Label X  ->  Please Confirm            (correct)
+Record Cue 110 Label X      ->  Please Confirm            (implicit list 1)
+```
+
+The error is stranger than a plain rejection — the *active* cue number gets
+spliced into the echo, so it reads as if a cue "100" were part of the command.
+
+## 23. Cue notes
+
+`Notes`, not `Note`:
+
+```
+Cue 1 / 110 Note  Cool open   ->  Syntax Error
+Cue 1 / 110 Notes Cool open   ->  works
+```
+
+Notes display in a bar at the bottom of the PSD and, with *Display Pending Cue
+Notes* enabled, for the pending cue too — so they are readable during a show,
+not just in the editor.
+
+## 24. Screenshots capture the frontmost app; accessibility clicks do not care
+
+`tell process "Eos Family" to click button N of window 1` reaches Eos **even
+when another application is in front**. `screencapture` does not — it captures
+whatever is actually on top.
+
+That combination produces very confusing debugging: the click lands correctly,
+the screenshot shows a different application, and the automation appears to have
+failed when it worked. Bring Eos frontmost *before screenshotting*, and check:
+
+```applescript
+tell application "System Events" to get name of first process whose frontmost is true
+```
+
+Related: a coordinate click (`click at {x, y}`) is aimed at the screen, so it
+*does* need Eos frontmost, and an early one landed on the workspace selector and
+switched the console to an empty workspace.

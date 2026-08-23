@@ -170,3 +170,52 @@ subs 11-40   Freeze         all effects
 
 Sub 8 FRONT carries **Exclude Solo**, so the front wash stays up when the
 strobe solos everything else.
+
+## Effects: pick the right type for the job
+
+**A strobe must be an `Absolute` effect, not `StepBased`.**
+
+`Strobe All` (fx 11) is StepBased with **Cascade entry**. Two problems: Cascade
+staggers fixtures *into* the effect so the hit never lands together, and step
+effects interpolate between their On and Off states, so there is always a fade
+however short. It reads as a soft flutter rather than a strobe.
+
+`Int Strobe Fast` (fx 941) is **Absolute** — it writes literal values from a
+table, so it snaps between out and full. Sub 1 STROB now runs that.
+
+See [effects-model.md](effects-model.md) for the five types.
+
+## A fader has three configurable layers
+
+Only the first is reachable from the command line, and this trips people up
+repeatedly:
+
+| Layer | What it is | Scriptable? |
+|---|---|---|
+| **Target / ID** | what content the fader holds | **yes** — `Fader P / F Sub N` |
+| **Slider mode** | Master, Effect Rate, Effect Size, Rate Master, Master Only, Effect Master, Levels Only | no |
+| **Button actions** | Solo, Freeze, Assert, Off/On, Release, Mark NPs, Macro... | no |
+
+### A global effect rate fader
+
+Set any fader's **slider** to **Effect Rate**. Per the manual it "controls the
+rate of *any running effects*", so it is a global rate control and the fader
+needs no content mapped to it at all. It centres to home — push up or pull down
+to ride the whole rig faster or slower.
+
+There is **no command-line path**: `Fader P / F Effect`, `Global Effect`, `Rate`,
+`Rate Master` all error. `Mapped To Effect` is recognised but incomplete. Tab 36,
+by hand.
+
+Fader 6 CHASE already shows `Effect Rate(60,800)` — the same slider mode scoped
+to its own sub rather than global.
+
+## The fixtures have a real shutter
+
+`Chan 1 Shutter 50` is accepted — the pars carry a shutter/strobe parameter. A
+hardware shutter strobe is crisper than any intensity effect, because the fixture
+does the chopping instead of the console re-sending levels.
+
+Not implemented: it needs the Uking par's shutter ranges (typically something
+like 0–7 closed, 8–215 strobe speed, 216+ open), which are not readable from the
+profile over OSC. Either read the DMX chart or step the value and watch.
