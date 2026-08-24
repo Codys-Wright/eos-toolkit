@@ -68,7 +68,7 @@ FX_MACROS = [
     (134,209,34,"FX Ch Scatter"),   (135,210,35,"FX Ch Quarters"),
     (136,211,36,"FX Ch Strips"),    (137,212,37,"FX Ch Movers"),
 ]
-STOP_MACRO = (140, "FX Stop All")     # Group 1 Effect Enter -> stop flag on all
+STOP_MACRO = (140, "FX Stop All")     # Group 10 Effect Enter -> stop flag on all
 
 EDIT_SOFTKEY = 6      # {Edit} in the list view; reads {Done} once in edit mode
 
@@ -98,8 +98,15 @@ def osa_keys(seq):
             lines.append("  key code 36")
         elif k in HOTKEY:
             lines.append(f"  keystroke {HOTKEY[k]}")
-        else:
+        elif len(k) == 1:
             lines.append(f'  keystroke "{k}"')
+        else:
+            # An unmapped multi-character token would be typed one letter at a
+            # time, and in the Macro Editor every letter is a hotkey. That is
+            # silent corruption, so refuse it instead.
+            raise ValueError(
+                f"key {k!r} is not in HOTKEY and is not a single character. "
+                f"Add it to HOTKEY or express it as separate keys.")
         lines.append("  delay 0.12")
     lines.append("end tell")
     osa("\n".join(lines))
@@ -218,18 +225,36 @@ def main():
 
     # Each FX macro STOPS every running effect before starting its own, so the
     # buttons are mutually exclusive - pressing one replaces the last rather
-    # than stacking. "Group 1 Effect [Enter]" with no effect number is Eos's
+    # than stacking. "Chan 1 Thru 101 Effect [Enter]" with no effect number is Eos's
     # stop flag; it kills effects without touching levels or colour.
-    STOP = ["group", "1", "effect", "enter"]
+    # THE STOP MUST USE A CHANNEL RANGE. The group form ("group 10 effect")
+    # is accepted and stops nothing, so every FX macro built with it stacked
+    # its effect on top of the previous one instead of replacing it. Verified
+    # with probe subs; see trap 29. Keystrokes, so digits are separate keys.
+    # NO "Chan" KEYWORD. A bare number on the Eos command line is already a
+    # channel selection, and "chan" is not in HOTKEY - it got typed as the
+    # letters c,h,a,n, which inside the Macro Editor are the hotkeys
+    # Copy_To / Rem_Dim / @ / Sneak. Every macro came out starting
+    # "Copy_To Rem_Dim @ Sneak" and the build still reported 0 errors.
+    STOP = ["1", "thru", "1", "0", "1", "effect", "enter"]
     jobs = [(num, STOP + ["group"] + digits(grp) + ["effect"] + digits(fx) + ["enter"], lab)
             for num, grp, fx, lab in FX_MACROS]
-    jobs.append((STOP_MACRO[0], ["group", "1", "effect", "enter"], STOP_MACRO[1]))
+    jobs.append((STOP_MACRO[0], list(STOP), STOP_MACRO[1]))
 
     for num, keys, label in jobs:
         if a.only and num not in a.only:
             continue
         got = b.write(num, keys, label)
-        print(f"macro {num:>4}  {label:<15} -> {(got or {}).get('text','')!r}")
+        body = (got or {}).get("text", "")
+        # A macro that reads back is not a macro that is CORRECT. Compare the
+        # body to what we meant to type - the "0 errors" run that produced
+        # "Copy_To Rem_Dim @ Sneak ..." printed these and nobody looked.
+        ok = ("Copy_To" not in body and "Rem_Dim" not in body
+              and "Sneak" not in body and "Thru" in body and "Effect" in body)
+        flag = "" if ok else "   <-- BODY WRONG"
+        if not ok:
+            b.errors.append((num, f"unexpected macro body: {body!r}"))
+        print(f"macro {num:>4}  {label:<15} -> {body!r}{flag}")
 
     if conn:
         b.key("live")

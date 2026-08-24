@@ -42,28 +42,46 @@ MID_C   = "24 Thru 27"
 MIDC_R  = "28 Thru 31"
 WIDE_L  = "32 Thru 35"
 WIDE_R  = "36 Thru 39"
-BACK_L  = "40 Thru 42"
+BACK_L  = "42"      # was 40-42; 40/41 are audience-facing cans (group 2)
 BACK_C  = "43 Thru 45"
-BACK_R  = "46 Thru 48"
+BACK_R  = "46"      # was 46-48; 47/48 are audience-facing cans (group 2)
 
 LEFT_ALL   = f"{MID_L} + {MIDC_L} + {FRONT_L} + {WIDE_L} + {BACK_L}"
 RIGHT_ALL  = f"{MID_R} + {MIDC_R} + {FRONT_R} + {WIDE_R} + {BACK_R}"
 CENTRE_ALL = f"{FRONT_C} + {MID_C} + {BACK_C}"
 DOWNSTAGE  = f"{FRONT_C} + {FRONT_L} + {FRONT_R}"
-UPSTAGE    = "40 Thru 48"
+UPSTAGE    = "42 Thru 46"   # the upstage WASH, without the audience cans
 
 PAGES = {
 1: [  # ---- GLOBAL: whole rig, types, sides, depth, quick splits
-    ( 1, "Rig All",      "1 Thru 98"),
-    ( 2, "Wash All",     "1 Thru 48 + 50 Thru 53"),
-    ( 3, "Pars All",     "1 Thru 48"),
-    ( 4, "Movers All",   "80 Thru 83 + 85 Thru 88"),
-    ( 5, "Strips",       "90 Thru 97"),
-    ( 6, "SlimPars",     "50 Thru 53"),
-    ( 7, "Movers OH",    "80 Thru 83"),
-    ( 8, "Movers Beam",  "85 Thru 88"),
-    ( 9, "Haze",         "100 Thru 101"),
-    (10, "Mvr + Strip",  "80 Thru 83 + 85 Thru 88 + 90 Thru 97"),
+    # THE FIRST TEN ARE THE FRONT PAGE OF THE DIRECT SELECTS. Named as plain
+    # plurals, by fixture family, with "All" last so the big one is the
+    # rightmost button rather than the first.
+    #
+    # Groups 7, 8 and 10 are LOAD-BEARING:
+    #   7 / 8   build_presets.py and build_focus_intensity.py address the
+    #           movers as Group 7 (OH) and Group 8 (Beam).
+    #   10      is the whole-rig selection. build_presets.py, build_chases.py,
+    #           build_popstars.py and build_focus_intensity.py use it as their
+    #           reset ("Group 10 At 0"), build_colors.py records every colour
+    #           palette against it, and macro 140 stops effects with it.
+    # If someone re-makes 1-10 by hand and these three move, the builders
+    # record onto whatever is there instead. Pars have no pan/tilt and do not
+    # error, so the failure is silent. Check before re-running anything.
+    # 40, 41, 47 and 48 are PAR CANS on the back wall FACING THE AUDIENCE -
+    # hard, narrow, and pointed at people. Everything else washes the stage.
+    # Keeping them apart matters: they are blinders, not part of a wash, and
+    # anything that pushes the wash up should not also hit the audience.
+    ( 1, "Washers",      "1 Thru 39 + 42 Thru 46 + 50 Thru 53"),
+    ( 2, "Pars",         "40 Thru 41 + 47 Thru 48"),
+    ( 3, "Movers",       "80 Thru 83 + 85 Thru 88"),
+    ( 4, "Strips",       "90 Thru 97"),
+    ( 5, "SlimPars",     "50 Thru 53"),
+    ( 6, "Hazers",       "100 Thru 101"),
+    ( 7, "OH Movers",    "80 Thru 83"),
+    ( 8, "Beam Movers",  "85 Thru 88"),
+    ( 9, "Movers + Strips", "80 Thru 83 + 85 Thru 88 + 90 Thru 97"),
+    (10, "All",          "1 Thru 18 + 20 Thru 97"),   # skips phantoms 19, 98
     (11, "Left All",     LEFT_ALL),
     (12, "Centre All",   CENTRE_ALL),
     (13, "Right All",    RIGHT_ALL),

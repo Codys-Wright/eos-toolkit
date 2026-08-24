@@ -102,3 +102,30 @@ time.sleep(0.35)
 ```
 
 And tell the operator not to touch the computer while it runs.
+
+
+## Firing a macro
+
+`Macro <n>` typed on the command line does **not** run it — it echoes and does
+nothing. Use the key:
+
+```python
+for k in ("macro", "1", "4", "0", "enter"):
+    conn.send(f"/eos/key/{k}", 1); conn.send(f"/eos/key/{k}", 0)
+```
+
+See [trap 30](command-line-traps.md).
+
+## Verifying a macro
+
+Reading the body back is not enough — compare it to what you meant to type. A
+38-macro build once returned `Copy_To Rem_Dim @ Sneak 1 Thru 1 0 1 Effect` for
+every single macro, printed all 38 of them, and exited 0.
+
+The cause: `chan` is not in `HOTKEY`, so it was typed as four letters, and in
+the Macro Editor C/H/A/N are the hotkeys Copy_To / Rem_Dim / @ / Sneak. Any
+unmapped multi-character token does this. `build_macros.py` now raises rather
+than typing one, and flags a body containing those tokens as an error.
+
+No `Chan` keystroke is needed anyway: a macro body starting with a bare digit
+auto-completes to a channel selection when it plays back.

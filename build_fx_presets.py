@@ -99,6 +99,10 @@ class Build:
         self.errors.append(("save", "not confirmed"))
 
 
+# STAGE STATE IS AN INPUT TO EVERY Record. "Sneak Time 0" sets a TIME - it
+# clears nothing. Use "Group 10 Sneak Time 0", which actually sneaks the whole
+# rig back to background, and release the cue list before building. Otherwise
+# whatever is on stage when this runs gets recorded into the target.
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
@@ -108,6 +112,9 @@ def main():
 
     conn = None if a.dry_run else E.Conn(a.host, a.port)
     b = Build(conn, a.dry_run)
+    # Release the cue list first - Record captures the stage.
+    b.send("Go_To_Cue Out")
+    b.send("Group 10 Sneak Time 0")
     if conn:
         conn.send("/eos/key/live", 1); conn.send("/eos/key/live", 0)
         time.sleep(0.5)
@@ -118,13 +125,13 @@ def main():
 
     for sub, fx, grp, lvl, label in BANK:
         print(f"sub {sub:>3}  {label:<15} = Group {grp:>3} + Effect {fx}")
-        b.send("Sneak Time 0")               # release manual AND running effects
+        b.send("Group 10 Sneak Time 0")               # release manual AND running effects
         b.send(f"Group {grp} At {lvl}")
         b.send(f"Group {grp} Effect {fx}")   # Effect will not chain after At
         b.send(f"Record Sub {sub}")
         b.send(f"Sub {sub} Label {label}")
 
-    b.send("Sneak Time 0")
+    b.send("Group 10 Sneak Time 0")
     b.save()
     if conn:
         conn.close()

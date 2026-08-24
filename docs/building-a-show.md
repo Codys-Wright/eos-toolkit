@@ -112,3 +112,36 @@ stopped at that effect with the original still in place.
 
 Wait for `/eos/out/event/show/saved` — it carries the file path and is the only
 proof a save happened. If it does not arrive within ~15s, nothing was written.
+
+## Colour-free presets: the busking model
+
+A preset that stores colour fights the cue it lands on. Split the job instead:
+
+- **the song cue** owns the colour scheme
+- **presets 1-25** own position and intensity, and store no colour at all
+- **faders and FX macros** own motion
+
+Record the colour-free bank with `Record Only`, which stores *only manual
+parameter data*. Set intensity and focus, never touch colour, and colour is
+simply not in the preset:
+
+```
+Group 10 Record_Only Preset 1
+```
+
+Verified on stage rather than from the dump, because the preset reply carries
+no parameter-category detail — set a colour, recall the preset, and compare:
+
+```
+before        intensity 80    hue/sat [49.666, 40.669]
+after preset  intensity 100   hue/sat [49.666, 40.669]   <- untouched
+```
+
+Two things that will bite:
+
+- **`Record Only` merges into an existing target** (trap 26), so `Delete` first
+  or every run stacks onto the last.
+- **The stage must be clean anyway.** `Record Only` limits *which* data is
+  stored, not whether it is correct — a running effect is manual-ish state and
+  a live cue still contaminates a plain `Record`. Use the full preamble:
+  `Go_To_Cue Out`, `Chan 1 Thru 101 Effect`, `Group 10 Sneak Time 0`.

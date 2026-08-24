@@ -121,3 +121,58 @@ Measured on a rig of 48 RGB pars, 9 movers, 8 strips:
 
 Tell-tale in the show file: palette names like `OH White Red`, `OH Orange Cyan`
 are wheel positions parked *between* two gel slots. Only a wheel does that.
+
+## Hollow effects: a perfect label and an empty step table
+
+**An effect that reads back correctly can do nothing at all.** Eos publishes an
+effect's label, type, entry/exit, scale and rate over OSC. It does **not**
+publish the step or value table. So the one thing that determines whether an
+effect produces motion is the one thing you cannot read.
+
+On this show, 10 of the 34 effects the fader banks referenced were hollow:
+
+```
+  2 Chase Rev    3 Chase Bounce    6 Sparkle    9 Fire
+413 Step R-Y-B  800 Red-Blue     814 Green-Mag
+848 Cyan-Orange 856 Mag-Yellow   912 Rainbow RGB
+```
+
+Two causes, and both matter:
+
+- **`Copy_To` damage.** The stock colour fades were relocated to 800-860 with
+  `Copy_To`, which preserves every *readable* field and drops the step table.
+  The copies kept their names and lost their contents.
+- **Authoring that never landed.** Effects 2, 3, 6 and 9 are in our own 1-37
+  block. They were never successfully written, and nothing caught it, because
+  the label looked right ever after.
+
+`912 Rainbow RGB` is the cautionary one: the name is perfect, the type is
+Linear, the scale is 25, and it has never produced a single hue change. A
+submaster was built on it purely because the label matched the intent.
+
+### Testing
+
+The only test is to run one and watch a parameter move.
+
+```bash
+python3 test_effects.py              # every effect the fader banks use
+python3 test_effects.py 912 919      # specific ones
+```
+
+It applies each effect, then samples the selected channel's encoder wheels
+several times and reports whether any value changed. Works for colour,
+intensity and focus effects alike, since every parameter surfaces as a wheel.
+
+Two gotchas it has to work around, both worth knowing on their own:
+
+- Wheel and colour values publish on **selection change**, not on demand, so
+  the sampler bounces the selection off an empty channel before every read.
+  Without that you get the *previous* channel's values and never know.
+- Effects survive a sneak. Stop them with `Chan 1 Thru 101 Effect` between
+  tests - the `Group` form does nothing (trap 29).
+
+### The lesson for the library
+
+Do not build a fader, macro or cue on a stock effect because its name matches
+what you want. Author the effects you rely on, verify them by running them, and
+keep that verified set as the thing you carry between rigs.

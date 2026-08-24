@@ -61,20 +61,62 @@ Cue 1 / 110 Notes Cool open. Deep blue wash on cyan depth. Calm and wide
 
 Keep them plain — no quotes, slashes or brackets.
 
-## Status: the colours are NOT verified
+## Build order matters
 
-The looks are recorded and the notes are in, but **it was never confirmed that
-each cue holds its intended colour**. Two things polluted every measurement:
+`build_popstars.py` and `build_song_looks.py` **write the same cue numbers**.
+Popstars builds the structure — acts as blocks, links, scene markers — and
+records 110/120/130, 210/220/230 and so on as part of that. Song looks then
+records the *look* into those same cues.
 
-- **Fader 6 CHASE was up at 60%**, so a colour-shifting effect ran over every
-  cue that was tested.
-- The render measurement averaged the *whole* stage. Each look deliberately puts
+```
+1.  python3 build_popstars.py       structure: blocks, links, scenes
+2.  python3 build_song_looks.py     the look inside each song cue
+3.  python3 verify_song_looks.py    prove the colours landed
+```
+
+**Re-running popstars on its own silently discards every song look**, and
+nothing errors — the cues still exist and still play. If you touch the
+structure, re-run steps 2 and 3 behind it.
+
+## Status: verified
+
+**90 zone checks, 0 failures** (2026-08-23). Every one of the 18 song cues holds
+the colour it was designed with, on all five RGB zones — front, mid, back,
+slimpars and bars.
+
+Run it with `python3 verify_song_looks.py`. It clears the stage, learns the
+reference hue of each colour palette from the console rather than assuming one,
+then walks the cues sampling a single channel per zone.
+
+### What defeated the earlier attempts
+
+- **A fader was up** running a colour effect over every cue under test.
+- **The measurement averaged the whole stage.** Each look deliberately puts
   different colours on different zones, so the average tends to neutral and
   proves nothing.
 
-To verify properly: pull every fader to zero, `Go To Cue Out`, then step through
-the cues and check **one zone at a time** — sample only the region a single zone
-lights, or select one channel and read its colour.
+The verifier handles both: `Sub 1 Thru 137 At 0`, `Chan 1 Thru 101 Effect`,
+`Go_To_Cue Out`, then one channel at a time.
 
-The first build of these cues *did* fail this way and was rebuilt (see trap 21).
-The rebuild is believed good but is unconfirmed.
+### Three things that made the verifier itself lie before it told the truth
+
+Worth knowing, because each produced a confident wrong answer:
+
+1. **`/eos/out/color/hs` publishes on SELECTION CHANGE, not on demand.** Asking
+   for the same channel twice returns nothing the second time — and the stored
+   value still holds the *previous* channel's colour. A stale read looks
+   exactly like a real one. The fix is to bounce the selection off an empty
+   channel before every sample.
+2. **The cues fade over 3 seconds.** Sampling 1.2s after `Go_To_Cue` caught the
+   first zone mid-crossfade, returning hues that sat between two palettes.
+   Later zones passed only because the earlier samples had eaten the time.
+3. **An off-by-one in the zone table.** BARS was compared against DESIGN column
+   5, which is the *mover* colour, not column 6. It reported a correct stage as
+   broken — the most expensive kind of test failure.
+
+### Not covered
+
+The movers are **not** checked. They have colour wheels, so there is no hue to
+read back, and their slot values come from an OEM chart rather than a Riukoe
+document (see [rig-model.md](rig-model.md)). The beam movers are parked on Open
+because their 12-slot wheel chart is still unknown. Confirm those by eye.

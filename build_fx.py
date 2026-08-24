@@ -13,7 +13,7 @@ Rate/Scale are overrides applied to the RUNNING effect then recorded into the
 sub; Eos will not let the command line edit a stored effect definition.
 
 Groups referenced (from the rebuilt 1-100 library):
-   1 Rig All      3 Pars All    5 Strips      6 SlimPars   7 Movers OH
+  10 All          2 Pars        4 Strips      5 SlimPars   7 OH Movers
    8 Movers Beam 11 Left All   13 Right All  16 Front Wash 19 Back Wash
   21 Pars Odd    22 Pars Even  23 Pars 3rd   24 Pars 4th   25 Pars Split
   51 Movers All  66 Mvr Outer  67 Mvr Inner  87 Pars Qtr 1
@@ -191,6 +191,10 @@ class Build:
         self.errors.append(("save_show", "no confirmation event"))
 
 
+# STAGE STATE IS AN INPUT TO EVERY Record. "Sneak Time 0" sets a TIME - it
+# clears nothing. Use "Group 10 Sneak Time 0", which actually sneaks the whole
+# rig back to background, and release the cue list before building. Otherwise
+# whatever is on stage when this runs gets recorded into the target.
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
@@ -203,6 +207,9 @@ def main():
 
     conn = None if a.dry_run else E.Conn(a.host, a.port)
     b = Build(conn, a.dry_run)
+    # Release the cue list first - Record captures the stage.
+    b.send("Go_To_Cue Out")
+    b.send("Group 10 Sneak Time 0")
     lo = (min(a.pages) - 1) * 25 + 1
     hi = max(a.pages) * 25
 
@@ -221,7 +228,7 @@ def main():
         elif not (lo <= sub <= hi):
             continue
         print(f"sub {sub:>3}  {label}")
-        b.send("Sneak Time 0")            # release manual AND running effects
+        b.send("Group 10 Sneak Time 0")            # release manual AND running effects
         b.send(f"Group {grp} At {lvl}")
         b.send(f"Group {grp} Effect {fx}")
         if rate != 100:
@@ -231,7 +238,7 @@ def main():
         b.send(f"Record Sub {sub}")
         b.send(f"Sub {sub} Label {label}")
 
-    b.send("Sneak Time 0")
+    b.send("Group 10 Sneak Time 0")
     b.save()
     if conn:
         conn.close()

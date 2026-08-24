@@ -19,7 +19,7 @@ last cue links back to the first, so it self-runs forever once started.
 import argparse, sys, time
 import eosdump as E
 
-RIG = "Group 1"
+RIG = "Group 10"
 
 # (list, name, follow_seconds, additive, [ (label, [commands]) , ... ])
 #   additive=False -> each step starts from black, so only that step shows
@@ -42,7 +42,7 @@ CHASES = [
         ("Wide",  ["Group 18 At 100 Color_Palette 22"]),
         ("Back",  ["Group 19 At 100 Color_Palette 22"]),
         ("Hold",  []),
-        ("Clear", ["Group 1 At 0"]),
+        ("Clear", ["Group 10 At 0"]),
     ]),
     (13, "Depth Sweep", 0.35, False, [
         ("Front", ["Group 16 At 100 Color_Palette 12"]),
@@ -61,14 +61,14 @@ CHASES = [
         ("Even", ["Group 22 At 100 Color_Palette 21"]),
     ]),
     (16, "Colour Cycle 8", 0.60, False, [
-        (f"C{i+1}", [f"Group 3 At 85 Color_Palette {cp}",
-                     f"Group 6 At 85 Color_Palette {cp}",
-                     f"Group 5 At 70 Color_Palette {cp}"])
+        (f"C{i+1}", [f"Group 1 At 85 Color_Palette {cp}",
+                     f"Group 5 At 85 Color_Palette {cp}",
+                     f"Group 4 At 70 Color_Palette {cp}"])
         for i, cp in enumerate([1, 3, 4, 6, 9, 12, 17, 18])
     ]),
     (17, "Warm Cool Pulse", 0.80, False, [
-        ("Warm", ["Group 3 At 90 Color_Palette 22", "Group 5 At 70 Color_Palette 22"]),
-        ("Cool", ["Group 3 At 90 Color_Palette 23", "Group 5 At 70 Color_Palette 23"]),
+        ("Warm", ["Group 1 At 90 Color_Palette 22", "Group 4 At 70 Color_Palette 22"]),
+        ("Cool", ["Group 1 At 90 Color_Palette 23", "Group 4 At 70 Color_Palette 23"]),
     ]),
     (18, "Rainbow March", 0.50, False, [
         ("A", ["Group 11 At 90 Color_Palette 1", "Group 12 At 90 Color_Palette 6",
@@ -92,15 +92,15 @@ CHASES = [
         ("Sides", ["Group 11 At 100 Color_Palette 21",
                    "Group 13 At 100 Color_Palette 21"]),
         ("Wide",  ["Group 18 At 100 Color_Palette 21"]),
-        ("Out",   ["Group 1 At 0"]),
+        ("Out",   ["Group 10 At 0"]),
     ]),
     (22, "Build and Blow", 0.35, True, [
         ("1 Front", ["Group 16 At 80 Color_Palette 1"]),
         ("2 Mid",   ["Group 17 At 85 Color_Palette 2"]),
         ("3 Wide",  ["Group 18 At 90 Color_Palette 3"]),
         ("4 Back",  ["Group 19 At 95 Color_Palette 4"]),
-        ("5 BLOW",  ["Group 1 At 100 Color_Palette 21"]),
-        ("6 Out",   ["Group 1 At 0"]),
+        ("5 BLOW",  ["Group 10 At 100 Color_Palette 21"]),
+        ("6 Out",   ["Group 10 At 0"]),
     ]),
 ]
 
@@ -155,6 +155,10 @@ class Build:
         self.errors.append(("save_show", "no confirmation event"))
 
 
+# STAGE STATE IS AN INPUT TO EVERY Record. "Sneak Time 0" sets a TIME - it
+# clears nothing. Use "Group 10 Sneak Time 0", which actually sneaks the whole
+# rig back to background, and release the cue list before building. Otherwise
+# whatever is on stage when this runs gets recorded into the target.
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
@@ -166,16 +170,19 @@ def main():
     conn = None if a.dry_run else E.Conn(a.host, a.port)
     b = Build(conn, a.dry_run)
 
+    # Release the cue list first - Record captures the stage.
+    b.send("Go_To_Cue Out")
+    b.send("Group 10 Sneak Time 0")
     for lst, name, follow, additive, steps in CHASES:
         if a.lists and lst not in a.lists:
             continue
         print(f"cue list {lst}  {name}  ({len(steps)} steps @ {follow}s)")
         b.send(f"Delete Cue {lst} / 1 Thru {lst} / 999", confirm=True,
                tolerate=("Does Not Exist",))
-        b.send("Sneak Time 0")
+        b.send("Group 10 Sneak Time 0")
         for i, (label, cmds) in enumerate(steps, start=1):
             if not additive:
-                b.send("Group 1 At 0")
+                b.send("Group 10 At 0")
             for cm in cmds:
                 b.send(cm)
             b.send(f"Record Cue {lst} / {i}")
@@ -184,7 +191,7 @@ def main():
             b.send(f"Cue {lst} / {i} Follow {follow}")
         b.send(f"Cue {lst} / {len(steps)} Link {lst} / 1")
         b.send(f"Cue {lst} / Label {name}")
-        b.send("Sneak Time 0")
+        b.send("Group 10 Sneak Time 0")
 
     b.save()
     if conn:

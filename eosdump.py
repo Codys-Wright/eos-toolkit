@@ -264,6 +264,9 @@ PLURAL = {"patch": "patch", "cuelist": "cuelists", "cue": "cues",
 
 # ------------------------------------------------------------- the dump
 
+IDLE_SCALE = 1.0      # raised by --slow for networked consoles
+
+
 def drain(conn, coll, idle=0.45, hard=120.0):
     """Read replies until the console goes quiet for `idle` seconds."""
     start = last = time.time()
@@ -280,18 +283,33 @@ def drain(conn, coll, idle=0.45, hard=120.0):
     return n
 
 
-def ask_count(conn, coll, path):
-    conn.send(f"/eos/get/{path}/count")
-    drain(conn, coll, idle=0.35, hard=8)
-    args = coll.plain.get(f"/eos/out/get/{path}/count")
-    return int(args[0]) if args else 0
+def ask_count(conn, coll, path, tries=3):
+    """How many of `path` exist?
+
+    NEVER return 0 for "no reply". Over a network the console can be slower
+    than the drain window, and a silent 0 is indistinguishable from an empty
+    section - this reported a full 100-preset library as empty and very nearly
+    got the transfer declared broken. Retry, then say so loudly.
+    """
+    key = f"/eos/out/get/{path}/count"
+    for attempt in range(tries):
+        conn.send(f"/eos/get/{path}/count")
+        drain(conn, coll, idle=0.35 * IDLE_SCALE, hard=8 * IDLE_SCALE)
+        args = coll.plain.get(key)
+        if args:
+            return int(args[0])
+        if attempt + 1 < tries:
+            print(f"  (no count for {path}, retry {attempt + 1})", file=sys.stderr)
+    raise SystemExit(
+        f"No count reply for '{path}' after {tries} tries.\n"
+        f"  This is NOT the same as zero. Likely a slow link - try --slow.")
 
 
 def dump(conn, verbose=True):
     coll = Collector()
 
     conn.send("/eos/get/version")
-    drain(conn, coll, idle=0.4, hard=8)
+    drain(conn, coll, idle=0.4 * IDLE_SCALE, hard=8 * IDLE_SCALE)
     ver = coll.plain.get("/eos/out/get/version")
     if not ver:
         raise SystemExit(
@@ -503,6 +521,9 @@ def digest(doc):
 
 def main():
     ap = argparse.ArgumentParser(description="Dump ETC Eos show data over OSC.")
+    ap.add_argument("--slow", action="store_true",
+                    help="stretch every wait ~4x: use for a console over the "
+                         "network, where replies are far slower than localhost")
     ap.add_argument("--host", default="127.0.0.1",
                     help="Eos/Nomad IP (default 127.0.0.1 for Nomad on this machine)")
     ap.add_argument("--port", type=int, default=None,
@@ -517,6 +538,9 @@ def main():
                     help="also write <out>.raw.txt listing every reply address seen")
     ap.add_argument("-q", "--quiet", action="store_true")
     a = ap.parse_args()
+    if a.slow:
+        global IDLE_SCALE
+        IDLE_SCALE = 4.0
 
     port = a.port if a.port else (8000 if a.udp else 3032)
     mode = "udp" if a.udp else "tcp"

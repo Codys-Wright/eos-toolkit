@@ -1,132 +1,105 @@
 # Where things stand
 
 Snapshot of the show file and the open threads, so a fresh session can pick up
-without re-deriving anything.
+without re-deriving anything. Updated 2026-08-23.
 
 ## The show file
 
-`Popstars Playground.esf2` — saved in `~/Downloads/`, and re-saved after every
-build. The original reference show is untouched at
-`REV REMIX ver10 FINAL 7-26 2026-07-26 20-46-53.esf3d`.
+`Popstars Playground 3D FULL ROOM With Edits.esf3d` in `~/Downloads/`, re-saved
+after every build.
 
-| | Count | Where |
+| | Count | Notes |
 |---|---|---|
-| Cue list 1 **PopStars** | 53 cues | 31 show cues (1–690) + 22 legacy utility cues (1000–4999) |
-| Cue list 900 | 328 cues | the original reference show, preserved |
-| Cue lists 10–22 | 13 chases | looping cue lists — Zone Sweep, Colour Cycle 8, Build and Blow… |
-| Effects | 148 | **ours at 1–37**; stock colour fades moved to 800–860, shapes at 900+ |
-| Groups | 112 | 1–100 in four paged banks + ordered chase groups 201–212 |
-| Colour palettes | 150 | 6 pages incl. blackbody colour temperature 2700–6500K |
-| Focus palettes | 62 | 12 original + two 5×5 coordinate grids inside the measured envelope |
-| Intensity palettes | 25 | balance page — levels are guesses, never tuned by eye |
-| Presets | 75 | signature looks · colour washes · mover looks |
-| Submasters | 137 | 1–100 stock-effect bank, 101–137 paired to effects 1–37 |
-| Macros | 42 | **101–137 one-press FX**, 140 stop-all, plus the show's original 1/2/5 |
-| Magic sheets | 9 | 5 original + probe sheets; six generated sheets sit unimported in `~/Downloads/` |
+| Groups | 112 | 1-10 renamed as plain plurals, **All at 10** |
+| Focus palettes | 73 | **1-20 are Augment3d XYZ coordinates** |
+| Colour palettes | 150 | 1-10 verified by hue read-back |
+| Beam palettes | 27 | **not curated** - still needs eyes on the rig |
+| Presets | 100 | 1-25 position+intensity, 26-50 movers, 51-100 full looks |
+| Submasters | 135 | banks of eight on faders 1-8, 9-16, 33-40 |
+| Macros | 42 | 101-137 FX, 140 stop-all |
+| Cue list 1 | 53 cues | 18 song looks, colours verified |
 
-### The show structure
+## What is verified, and how
 
-Acts are numbered by **identity**, sequenced by **links**, and each act's video
-cue is **blocked** so acts are reorderable without renumbering:
+Everything below was proved by reading the rig back, not by trusting an echo.
 
-```
-1/1    Speech            -> 1/100
-1/100  GR Video (block) · 110/120/130 songs · 190 Out -> 1/200
-1/200  AUB ...           -> 1/300
-1/300  P3  ...           -> 1/400
-1/400  TRI ...           -> 1/500
-1/500  KK  ...           -> 1/600
-1/600  PS  ...
-```
+- **Song cue colours** - 90 zone checks, 0 failures (`verify_song_looks.py`).
+  This was the show's oldest open item.
+- **Mover presets 26-50** - 25 checked against their focus palettes, 0
+  mismatches (`verify_presets.py`).
+- **Fader mapping** - 40 faders, 0 unaccounted for (`verify_faders.py`).
+- **XYZ focus palettes 1-20** - every one of 160 per-channel read-backs within
+  2 cm of the requested coordinate.
+- **Effects** - `test_effects.py` runs each one and reports which are hollow.
+  10 of 34 were: 2, 3, 6, 9, 413, 800, 814, 848, 856, 912.
+- **Complete looks 51-100** - 250 checks, 0 failures (`verify_looks.py`):
+  colour on four zones plus mover position, for all fifty.
+- **Colour-free presets** - proved on stage to leave a cue's colour untouched.
 
-Scene markers on 1, 100, 200, 300, 400, 500, 600 — jump by name with
-`[Go To Cue]` → `{Scenes}`.
+## The operating model
 
-## The live workflow
-
-1. **Cue list 1** with `[Go]` — structure, and the colour for each song
-2. **Colour palettes** — retint if a song wants something different
-3. **FX macros 101–137** — one press, each stops the previous, `140` clears
-4. **FX submasters** — additive, on faders, for deliberate layering
-
-Macros are radio buttons; submasters are layers. That distinction is the whole
-operating model.
+1. **Song cue** owns the colour scheme.
+2. **Presets 1-50** own position and intensity, and carry no colour at all, so
+   any of them drops onto any cue without fighting it.
+3. **Presets 51-100** are complete looks for when you want the whole thing.
+4. **Bank 2 faders (9-16)** are the stage laid out left to right.
+5. **Bank 1 faders (1-8)** are effect layers.
+6. **FX macros 101-140** are radio buttons; each stops the previous.
 
 ## Open threads
 
-Everything below is the state as of the end of the Norco build session. See
-[norco-location.md](norco-location.md), [busking-faders.md](busking-faders.md)
-and [show-cues.md](show-cues.md) for the detail.
+### Needs someone at the console
 
-### Done and verified
+- **Beam palettes 1-10.** Neither fixture profile publishes gobo names over
+  OSC, and Augment3d does not render the patterns. The DMX charts and slot
+  centres are in `rig-model.md`; `gobo_walk.py` puts four slots on the four OH
+  movers at once. Ten minutes with the rig up.
+- **I-Master on the FX subs.** Without it a sub's recorded level masks its own
+  effect (HTP). `Sub N Effect_Master` parses and does nothing - trap 18. Tab 36,
+  by hand. `build_busking_faders.py` prints the list that needs it.
+- **The effect rate fader.** Set a fader's slider to Effect Rate in Tab 36. No
+  command-line path.
 
-- **The room** is modelled to the real venue and loaded on the console. Built by
-  `a3d_room.py` from two numbers (stage width x depth in feet).
-- **The rig**: 57 fixtures placed and aimed by `build_rig_positions.py`, every
-  one confirmed by read-back. 12 more (movers 85-88, bars 90-97) are
-  operator-placed and **the builder must not write them**.
-- **Direct selects**: four banks of ten — groups, colour, focus, beam.
-- **Colour palettes 1-10** rebuilt with explicit RGB and verified by reading hue
-  back. Yellow is 26 deg off Orange, Purple 30 deg off Magenta; both were
-  near-identical before.
-- **Busking faders**: five pages built, mapped, timed and filtered by
-  `build_busking_faders.py`; the button actions set by hand in Tab 36 and read
-  back clean.
+### Known gaps
 
-### Done but NOT verified
+- **The Betopper wheel chart is unknown** - 12 gobos and 12 colours on a
+  different chart from the Riukoe. The beam movers are parked on Open in the
+  song cues until someone reads it off the fixture.
+- **Hang to Focus Offset is zero** on both mover profiles. Eos uses it to
+  convert an XYZ target to pan/tilt, so every aim is slightly off until it is
+  set at Patch > {Fixtures} > {Physical Data}.
+- **Fader banks 4 and 5 are unmapped.** The grid is irregular - usable faders
+  are 1-16, 21 and 31-40 only.
+- **Mover colour-wheel effects** (WHEEL SPIN / BUMP / ALT) are not authored.
+  The builder skips them rather than recording silent intensity masters.
 
-- **The 18 song cues.** `build_song_looks.py` recorded a look and a vibe note
-  for every song. The notes are confirmed on screen. **The colours are not.**
-  The first build recorded 18 identical cues because of
-  [trap 21](command-line-traps.md); the rebuild is believed correct but every
-  measurement of it was polluted — fader 6 was up at 60% running a colour
-  effect, and averaging the whole render cannot distinguish a multi-colour look.
-  **Verify one zone at a time, with all faders at zero and the cue list out.**
+## Build order matters
 
-### Not started
+Three dependencies that fail silently if you get them wrong:
 
-- **A global effect rate fader.** Set any fader's *slider* to `Effect Rate` in
-  Tab 36 — it needs no content and controls every running effect. Page 2 fader
-  10 (`RIG`) is the most redundant slot. No command-line path exists.
-- **A hardware shutter strobe.** `Chan N Shutter <n>` is accepted, so the pars
-  have the parameter; the ranges are unknown.
-- **Chases 32-36, 38, 40 have no fader** — page 3 only has three usable slots
-  until its reserved faders are freed in Setup.
+```
+build_groups.py        groups 7, 8 and 10 are load-bearing
+build_xyz_focus.py     palettes BEFORE anything recorded against them
+build_presets.py       presets store RESOLVED values, not live references
+verify_presets.py
+```
 
-### Known-approximate
+```
+build_popstars.py      structure
+build_song_looks.py    the look inside each song cue - SAME cue numbers
+verify_song_looks.py
+```
 
-- **Ceiling height is an operator estimate** (12 ft), not a measurement.
-  Everything vertical scales off it.
-- **Tilt is capped at 65 deg**, so both audience trusses aim parallel instead of
-  the far one raking flatter.
-- **Channels 19 and 98 are unpatched** (address 0) and deliberately unplaced.
-- **Fader pages 4-5 button config** was read back clean *before* the last two
-  fixes, not after.
-
-**Colour FX macro bank** — agreed but not built. Macros 141–165 pointing at the
-absolute colour effects (800–860) and rainbows (910–919), same stop-then-start
-shape. Note a colour effect **overrides the cue's colour** while it runs, unlike
-the intensity ones.
-
-**Never verified by eye** — everything below was confirmed structurally but
-never watched running:
-- chase *direction* on effects 1–37 and cue lists 10–22 (group order is
-  unreadable over OSC)
-- cycle times (not in the `get/fx` reply)
-- the 61 colour fades moved to 800–860 (`Copy_To` preserves every readable
-  field, but step/value tables are not readable)
-- scene markers (no scene field in the cue reply)
-- intensity palette balance levels — pure guesses
-- the 31 cue looks — built from palette names, never seen on stage
-
-**Six magic sheets** generated in `~/Downloads/` (`MS - GROUPS.xml` etc.),
-never imported.
+Re-running `build_popstars.py` alone silently discards all 18 song looks.
+Changing a focus palette without re-running the presets leaves the palette and
+every preset built on it disagreeing (trap 31).
 
 ## Working agreements
 
-- Everything is regenerated from scripts, never hand-edited on the console — so
-  a change means editing data at the top of a script and re-running.
-- Read state back after every write. Eos does not error on input it does not
-  understand.
-- Scripts that use System Events synthesise **real keystrokes**; the operator
-  must not touch the computer while they run.
+- Everything is regenerated from scripts, never hand-edited on the console.
+- **Read state back, and compare it to intent.** Reading without comparing is
+  how 38 corrupt macros reported success.
+- **Clear the stage before recording**: `Go_To_Cue Out`,
+  `Chan 1 Thru 101 Effect`, `Group 10 Sneak Time 0`. Record captures the stage.
+- Scripts using System Events synthesise real keystrokes; do not touch the
+  computer while they run.

@@ -39,46 +39,46 @@ ORDER = [100, 200, 300, 400, 500, 600]
 
 LIST = 1                        # which cue list the show lives in
 HAZE = "Chan 100 Thru 101"
-RESET = "Group 1 At 0"          # Group 1 = Rig All; colour/focus persist
+RESET = "Group 10 At 0"          # Group 10 = All; colour/focus persist
 
 # Groups, from the rebuilt 1-100 library:
-#   1 Rig All  3 Pars All  5 Strips  6 SlimPars
+#   10 All  2 Pars  4 Strips  5 SlimPars
 #   7 Movers OH  8 Movers Beam  16 Front Wash  25 Pars Split
 
 
 def video(a):
     """Stage low so the video reads. Blocked: acts must not inherit state."""
-    return [f"Group 5 At 15 Color_Palette 112",      # strips, Congo Blue
+    return [f"Group 4 At 15 Color_Palette 112",      # strips, Congo Blue
             f"{HAZE} At 45"]
 
 
 def song1(a):
     """Full wash, act primary colour, movers centre."""
-    return [f"Group 3 At 80 Color_Palette {a['primary']}",
-            f"Group 6 At 80 Color_Palette {a['primary']}",
+    return [f"Group 1 At 80 Color_Palette {a['primary']}",
+            f"Group 5 At 80 Color_Palette {a['primary']}",
             f"Group 7 At 100 Focus_Palette 2 Beam_Palette 15 Color_Palette {a['mover']}",
             f"Group 8 At 100 Focus_Palette 16 Color_Palette {a['floor']}",
-            f"Group 5 At 60 Color_Palette {a['primary']}",
+            f"Group 4 At 60 Color_Palette {a['primary']}",
             f"{HAZE} At 40"]
 
 
 def song2(a):
     """Moodier: split pars only, secondary colour, movers to the walls."""
     return [f"Group 25 At 55 Color_Palette {a['secondary']}",
-            f"Group 6 At 60 Color_Palette {a['secondary']}",
+            f"Group 5 At 60 Color_Palette {a['secondary']}",
             f"Group 7 At 90 Focus_Palette 4 Beam_Palette 17 Color_Palette {a['mover']}",
             f"Group 8 At 90 Focus_Palette 20 Color_Palette {a['floor']}",
-            f"Group 5 At 35 Color_Palette {a['secondary']}",
+            f"Group 4 At 35 Color_Palette {a['secondary']}",
             f"{HAZE} At 45"]
 
 
 def song3(a):
     """Anthem: everything up, white accents, movers open and wide."""
-    return [f"Group 3 At 100 Color_Palette {a['secondary']}",
-            f"Group 6 At 100 Color_Palette 21",
+    return [f"Group 1 At 100 Color_Palette {a['secondary']}",
+            f"Group 5 At 100 Color_Palette 21",
             f"Group 7 At 100 Focus_Palette 1 Beam_Palette 13 Color_Palette 21",
             f"Group 8 At 100 Focus_Palette 23 Color_Palette 21",
-            f"Group 5 At 80 Color_Palette 21",
+            f"Group 4 At 80 Color_Palette 21",
             f"{HAZE} At 50"]
 
 

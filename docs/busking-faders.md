@@ -6,22 +6,49 @@ mixing on the movers and a console with a restricted fader configuration.
 
 ## Layout
 
+Organised in **banks of eight**, because the control surface is a Behringer
+X-Touch: 8 channel faders plus a master. Fader numbers are absolute and
+continuous (trap 20), so an OSC fader bank of 8 pages cleanly through these
+while the console at 20-per-page shows banks 1-2 together.
+
 ```
-PAGE 1  ESSENTIALS   STROB RNBOW SMOOT OHMOV BMMOV CHASE SPOT FRONT WASH HAZE
-PAGE 2  CATEGORIES   WASH SLIMS SPOTS BEAMS BARS HAZE FRONT MID BACK RIG
-PAGE 3  (3 slots)    CFWD  ..  SPRKL FIRE
-PAGE 4  COLOUR FX    RNBWW RNBWL CFADE CBUMP R-BLU G-MAG C-ORG M-YEL SRGB SRYB
-PAGE 5  MOVEMENT     OHCIR OHSQR OHSPI OHTRI BMSCH BMCAN BMSWP MVBAL ISTRB IFADE
+BANK 1  faders  1-8   STROBE  RAINBOW  COL SMOOTH  OH MOVE
+                      BM MOVE  PAR CHASE  SPARKLE  INT FADE
+BANK 2  faders  9-16  THE STAGE, LEFT TO RIGHT
+                      LEFT  FRONT  MID  BACK  CENTRE  MOVERS  HAZE  RIGHT
+BANK 3  faders 17-24  colour FX + mover wheel equivalents
+BANK 4  faders 25-32  movement
+BANK 5  faders 33-40  overflow masters
+MASTER                effect rate
 ```
 
-Page 1 is a working show on its own: four intensity masters to build a base
-state, six effects to modulate it. Pages 4 and 5 stack on top — they are
-recorded against overlapping channel sets deliberately, so a colour fade under
-a chase layers rather than fights.
+**Bank 2 is a map of the stage.** Fader 1 of the bank is stage left and fader 8
+is stage right, so hand position matches the part of the stage it controls,
+with depth running downstage-to-upstage through the middle.
+
+### Fader mapping IS readable
+
+This document used to say it was not, and that belief is why the documented
+layout and the real one drifted apart for months - nobody could check.
+
+It is published through the **OSC fader bank** channel rather than the `get/`
+query protocol everything else here uses:
+
+```
+/eos/fader/1/config/20            create a 20-wide OSC bank
+/eos/out/fader/1/1/name           -> ['S 1 STROBE']
+/eos/out/fader/1/9/name           -> ['S 41 LEFT']
+```
+
+`verify_faders.py` reads that and compares it to the builder's table. It
+immediately found four stale mappings left over from the previous layout: the
+builder mapped faders but never *un*mapped them, so anything the new plan did
+not reach kept its old assignment. The verb is `Delete Fader <page> / <n>` -
+both `Unmap` and `Fader P / F Delete` are syntax errors.
 
 **Labels are capped at 5 characters** — that is all the fader display shows.
 
-## Sub numbers are fader numbers
+## Sub numbers are NOT fader numbers
 
 `Fader <page> / <fader> Sub <n>` maps content to a fader, and it is scriptable:
 
@@ -36,7 +63,31 @@ silently **wraps into page 2 fader 1** — pages hold 10 faders, so an
 out-of-range fader number relocates rather than erroring. That overwrote a
 whole page of content before it was noticed.
 
-### This console's fader grid
+### This console's fader grid — probed 2026-08-23
+
+**The fader page size is 10.** Showing 20 faders on screen is a display
+setting and does not change it. Slot numbers continue past the page size
+instead of erroring, so `Fader 2 / 16` is fader 26, not "page 2, slot 16":
+
+```
+absolute fader = (page - 1) * 10 + slot
+```
+
+Parse-checking a mapping at every slot gives the real shape:
+
+```
+usable   1-16,  21,  31-40      27 faders
+reserved 17-20, 22-30
+```
+
+That is why `Fader 1 / 16` worked while `Fader 2 / 16` failed — faders 16 and
+26, one usable and one reserved, from commands that look almost identical.
+
+Banks 1 and 2 sit at faders 1-8 and 9-16. Bank 3 goes to **33-40**, which is
+both a contiguous usable run and exactly page 5 of an 8-wide OSC fader bank on
+the X-Touch.
+
+### The old probe
 
 Probe before designing a layout — capacity is not uniform:
 

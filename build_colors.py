@@ -160,6 +160,10 @@ class Build:
         time.sleep(0.30)
 
 
+# STAGE STATE IS AN INPUT TO EVERY Record. "Sneak Time 0" sets a TIME - it
+# clears nothing. Use "Group 10 Sneak Time 0", which actually sneaks the whole
+# rig back to background, and release the cue list before building. Otherwise
+# whatever is on stage when this runs gets recorded into the target.
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
@@ -176,19 +180,22 @@ def main():
     conn = None if a.dry_run else E.Conn(a.host, a.port)
     b = Build(conn, a.dry_run)
 
+    # Release the cue list first - Record captures the stage.
+    b.send("Go_To_Cue Out")
+    b.send("Group 10 Sneak Time 0")
     if not a.no_wipe:
         print("wiping every existing colour palette")
         b.send("Delete Color_Palette 1 Thru 600", confirm=True,
                tolerate=("Does Not Exist",))
 
-    b.send("Sneak Time 0")
+    b.send("Group 10 Sneak Time 0")
     for num, label, (r, g, bl) in lib:
         print(f"cp {num:>3}  {label}")
-        b.send("Group 1 At 100")          # Group 1 = Rig All (1-98)
+        b.send("Group 10 At 100")          # Group 10 = All (whole rig, no phantoms)
         b.rgb(r, g, bl)
-        b.send(f"Group 1 Record Color_Palette {num}")
+        b.send(f"Group 10 Record Color_Palette {num}")
         b.send(f"Color_Palette {num} Label {label}")
-    b.send("Sneak Time 0")
+    b.send("Group 10 Sneak Time 0")
 
     if conn:
         conn.close()

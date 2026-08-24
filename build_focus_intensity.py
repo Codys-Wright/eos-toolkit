@@ -42,16 +42,16 @@ HAZE = "Chan 100 Thru 101"
 # with the rig up and nudge what looks wrong.
 IPS = [
     # row 1 - flat levels
-    ( 1, "Full",         ["Group 1 At 100"]),
-    ( 2, "Three Qtr",    ["Group 1 At 75"]),
-    ( 3, "Half",         ["Group 1 At 50"]),
-    ( 4, "Quarter",      ["Group 1 At 25"]),
-    ( 5, "Low",          ["Group 1 At 10"]),
+    ( 1, "Full",         ["Group 10 At 100"]),
+    ( 2, "Three Qtr",    ["Group 10 At 75"]),
+    ( 3, "Half",         ["Group 10 At 50"]),
+    ( 4, "Quarter",      ["Group 10 At 25"]),
+    ( 5, "Low",          ["Group 10 At 10"]),
     # row 2 - depth distribution
     ( 6, "Front Heavy",  ["Group 16 At 100", "Group 17 At 60", "Group 19 At 25"]),
     ( 7, "Mid Heavy",    ["Group 16 At 45", "Group 17 At 100", "Group 19 At 45"]),
     ( 8, "Back Heavy",   ["Group 16 At 25", "Group 17 At 60", "Group 19 At 100"]),
-    ( 9, "Even Wash",    ["Group 3 At 85", "Group 6 At 85", "Group 5 At 70",
+    ( 9, "Even Wash",    ["Group 1 At 85", "Group 5 At 85", "Group 4 At 70",
                           "Group 51 At 100"]),
     (10, "Front Only",   ["Group 16 At 90"]),
     # row 3 - width distribution
@@ -61,17 +61,17 @@ IPS = [
     (14, "Outside In",   ["Group 11 At 100", "Group 13 At 100", "Group 12 At 30"]),
     (15, "Inside Out",   ["Group 12 At 100", "Group 11 At 35", "Group 13 At 35"]),
     # row 4 - by fixture type
-    (16, "Pars Only",    ["Group 3 At 90"]),
+    (16, "Pars Only",    ["Group 1 At 90"]),
     (17, "Movers Only",  ["Group 51 At 100", f"{HAZE} At 50"]),
-    (18, "Strips Only",  ["Group 5 At 90"]),
-    (19, "Wash + Movers",["Group 3 At 85", "Group 6 At 85", "Group 51 At 100"]),
-    (20, "No Movers",    ["Group 3 At 90", "Group 6 At 90", "Group 5 At 75"]),
+    (18, "Strips Only",  ["Group 4 At 90"]),
+    (19, "Wash + Movers",["Group 1 At 85", "Group 5 At 85", "Group 51 At 100"]),
+    (20, "No Movers",    ["Group 1 At 90", "Group 5 At 90", "Group 4 At 75"]),
     # row 5 - show states
     (21, "Blackout",     []),
-    (22, "Preshow",      ["Group 5 At 20", f"{HAZE} At 40"]),
-    (23, "Work Light",   ["Group 3 At 70", "Group 5 At 50"]),
-    (24, "Video Safe",   ["Group 5 At 15", f"{HAZE} At 45"]),
-    (25, "Full Rig",     ["Group 1 At 100", f"{HAZE} At 55"]),
+    (22, "Preshow",      ["Group 4 At 20", f"{HAZE} At 40"]),
+    (23, "Work Light",   ["Group 1 At 70", "Group 4 At 50"]),
+    (24, "Video Safe",   ["Group 4 At 15", f"{HAZE} At 45"]),
+    (25, "Full Rig",     ["Group 10 At 100", f"{HAZE} At 55"]),
 ]
 
 
@@ -126,6 +126,10 @@ class Build:
         print("  !! SAVE NOT CONFIRMED", file=sys.stderr)
 
 
+# STAGE STATE IS AN INPUT TO EVERY Record. "Sneak Time 0" sets a TIME - it
+# clears nothing. Use "Group 10 Sneak Time 0", which actually sneaks the whole
+# rig back to background, and release the cue list before building. Otherwise
+# whatever is on stage when this runs gets recorded into the target.
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
@@ -137,6 +141,9 @@ def main():
     conn = None if a.dry_run else E.Conn(a.host, a.port)
     b = Build(conn, a.dry_run)
 
+    # Release the cue list first - Record captures the stage.
+    b.send("Go_To_Cue Out")
+    b.send("Group 10 Sneak Time 0")
     if a.only in (None, "focus"):
         print("clearing focus palettes 26-75 (1-23 kept: presets reference them)")
         b.send("Delete Focus_Palette 26 Thru 75", confirm=True,
@@ -147,7 +154,7 @@ def main():
                     num = base + r * 5 + cidx
                     label = f"{tag} {rname} {cname}"
                     print(f"fp {num:>3}  {label:<14} pan={pan} tilt={tilt}")
-                    b.send("Sneak Time 0")
+                    b.send("Group 10 Sneak Time 0")
                     b.send(f"Group {grp} At 100")
                     b.send(f"Group {grp} Pan {pan}")
                     b.send(f"Group {grp} Tilt {tilt}")
@@ -160,14 +167,14 @@ def main():
                tolerate=("Does Not Exist",))
         for num, label, cmds in IPS:
             print(f"ip {num:>3}  {label}")
-            b.send("Sneak Time 0")
-            b.send("Group 1 At 0")
+            b.send("Group 10 Sneak Time 0")
+            b.send("Group 10 At 0")
             for c in cmds:
                 b.send(c)
-            b.send(f"Group 1 Record Intensity_Palette {num}")
+            b.send(f"Group 10 Record Intensity_Palette {num}")
             b.send(f"Intensity_Palette {num} Label {label}")
 
-    b.send("Sneak Time 0")
+    b.send("Group 10 Sneak Time 0")
     b.save()
     if conn:
         conn.close()

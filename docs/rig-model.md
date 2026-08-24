@@ -181,3 +181,91 @@ this; use `Position` over OSC.
 The patch reply carries `augment3d_position` (x, y, z, rotation, flag). After
 the write: no X/Y moved, no address changed, `z == y` only on the two unplaced
 channels.
+
+## The mover wheels: real DMX ranges
+
+Eos exposes `Gobo Select` and `Color Select` on the Riukoe movers as bare
+numbers — the wheel label reads `Gobo Select [4]`, never `Gobo Select [Stars]`.
+The profile publishes no named ranges over OSC, so the slot boundaries have to
+come from the OEM chart.
+
+Source: the [Open Fixture Library entry for the Lixada Mini Gobo Moving Head
+Light](https://open-fixture-library.org/lixada/mini-gobo-moving-head-light) —
+the same generic shell. The RIUKOE product listing corroborates the counts
+("7 Gobos + Open White", "7 Colors + Open White"). **Boundaries are inference
+from an OEM-sibling document, not a Riukoe manual — confirm by eye.**
+
+### Gobo wheel — everything is in the first quarter
+
+```
+  0-63    Open + Gobo 1-7      8 slots, 8 DMX values each
+ 64-127   shake version of each slot
+128-255   rotation
+```
+
+| Slot | DMX | centre | Eos % |
+|---|---|---|---|
+| Open | 0–7 | 4 | 2% |
+| Gobo 1 | 8–15 | 12 | 5% |
+| Gobo 2 | 16–23 | 20 | 8% |
+| Gobo 3 | 24–31 | 28 | 11% |
+| Gobo 4 | 32–39 | 36 | 14% |
+| Gobo 5 | 40–47 | 44 | 17% |
+| Gobo 6 | 48–55 | 52 | 20% |
+| Gobo 7 | 56–63 | 60 | 24% |
+
+**A 0-100 sweep is the wrong instrument.** Three quarters of the range is shake
+and rotation, and stepping 0/10/20/30% lands 30% (DMX 76) on a shake, which
+reads as no pattern at all. Address slots by their centre.
+
+### Colour wheel
+
+| Slot | DMX | centre | Eos % |
+|---|---|---|---|
+| Open | 0–15 | 8 | 3% |
+| Red | 16–31 | 24 | 9% |
+| Pale Blue | 32–47 | 40 | 16% |
+| Orange | 48–63 | 56 | 22% |
+| Blue | 64–79 | 72 | 28% |
+| Yellow | 80–95 | 88 | 35% |
+| Green | 96–111 | 104 | 41% |
+| Pink | 112–127 | 120 | 47% |
+
+This explains the old palette names. `OH White Red` and `OH Orange Cyan` are
+wheel positions **parked between two slots** — recorded by eye, landing on the
+boundary. With the centres above they can be set exactly.
+
+Note the wheel colours are Red / Pale Blue / Orange / Blue / Yellow / Green /
+Pink. There is no cyan and no magenta, so no RGB-derived palette will ever
+match on these fixtures.
+
+### Walking the wheel
+
+`gobo_walk.py` puts a different slot on each of the four OH movers at once and
+aims them straight down, so four patterns land on the deck side by side:
+
+```bash
+python3 gobo_walk.py 0 1 2 3 --haze 45
+python3 gobo_walk.py 4 5 6 7 --haze 45
+python3 gobo_walk.py --off
+```
+
+Keep slot 0 (Open) in the first batch as a control: if Open looks the same as
+the others, the visualiser is not projecting gobos and this is a job for the
+real rig.
+
+### Augment3d does not render these gobos — confirmed
+
+Tried it: four OH movers, one slot each, aimed at the deck, haze at 45. Beams
+render, patterns do not, and slot 0 (Open) is indistinguishable from the rest.
+
+The patch reply explains it. `augment3d_beam` carries the beam angle (11 deg)
+and an **empty model field** — no Fixture Model is assigned, so Augment3d draws
+the default cone for the fixture type and has no gobo imagery to project.
+Fixture Model is set per fixture type at Patch > {Fixtures} > {Physical Data}
+and has no command-line path (trap 19), and a generic OEM profile is unlikely
+to carry gobo images even then.
+
+**So gobo appearance can only be learned in front of the rig.** What can be
+done without it is landing on each slot exactly, which is what the table above
+is for. Build the palettes by slot number now, rename them by eye later.

@@ -8,3 +8,6 @@ show.raw.txt
 __pycache__/
 *.pyc
 .DS_Store
+.build_all_state
+__pycache__/
+*.pyc
